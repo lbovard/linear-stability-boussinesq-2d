@@ -1,3 +1,9 @@
-This is linear stability code that solves the Navier-Stokes equations.
+This is linear stability code that solves the Boussinesq Navier-Stokes (BNS) equations.
 
-Blah blah explain!
+The idea is to take the BNS equations and derive the linear stability equations. From there, we numerically solve the equations for long term behaviour to determine the growth rate of the fastest growing mode. 
+
+References:
+
+Billant P. & Chomaz J.-M. 2000c "Three-Dimensional stability of a vertical columnar vortex pair in a stratified fluid" J. Fluid Mech. 418, 64
+
+
