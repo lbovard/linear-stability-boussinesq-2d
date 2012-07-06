@@ -17,5 +17,5 @@ initialise.o: globals.mod initialise.f90
 main.o: globals.mod initialise.mod main.f90
 	$(FC) -c main.f90
 clean: 
-	rm $(objects) prog *.mod
+	rm -f $(objects) prog *.mod
 
