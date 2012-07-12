@@ -20,12 +20,14 @@ contains
                 allocate(om_i(N,N),u_0(N,N),v_0(N,N))
                 !projection tensors
                 allocate(p11(Nr,N),p12(Nr,N),p13(Nr,N),p21(Nr,N),p22(Nr,N),p23(Nr,N),p31(Nr,N),p32(Nr,N),p33(Nr,N))
-                ! vorticity matrices
-                allocate(om1(Nr,N),om2(Nr,N),om3(Nr,N))
                 ! integrating factor 
                 allocate(iuu_hat(Nr,N),ivv_hat(Nr,N),iww_hat(Nr,N),irho_hat(Nr,N))
                 ! time step variables
-                allocate(uu_hat_new(Nr,N),vv_hat_new(Nr,N),ww_hat_new(Nr,N),rho_hat_new(Nr,N))
+                allocate(iuu_hat_new(Nr,N),ivv_hat_new(Nr,N),iww_hat_new(Nr,N),irho_hat_new(Nr,N))
+                ! right side variables
+                allocate(rr(N,N),ur(N,N),vr(N,N),wr(N,N))
+                allocate(rr_old(N,N),ur_old(N,N),vr_old(N,N),wr_old(N,N))
+                allocate(growth_rate(N))
         end subroutine alloc_matrices
 
         ! iniitialise wavenumber matrices
