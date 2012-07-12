@@ -5,25 +5,35 @@ program main
         use display
         implicit none
         integer :: i,j
-        real :: ukz=0.1 
-        complex(C_DOUBLE_COMPLEX), dimension(Nr,N) :: u_hat
         call alloc_matrices()
+        call alloc_fft()
         call init_fft()
-        call init_wn(4.0)
+        call init_wn()
         call init_grid()
         call init_projection()
-        forall(i=1:N,j=1:N) u(i,j)=1.0_8/real(i+j-1,8)  
-        do i=1,N-1
-                u(i,i+1)=real(i+1,8)
-        end do
+        call init_velocities()
+
+        call afft2(uu,uu_hat)
+        call afft2(vv,vv_hat)
+        call afft2(ww,ww_hat)
+        call afft2(rho,rho_hat)
+        uu_hat=uu_hat*p11+vv_hat*p12+ww_hat*p13
+        vv_hat=uu_hat*p21+vv_hat*p22+ww_hat*p23
+        ww_hat=uu_hat*p31+vv_hat*p32+ww_hat*p33
+        irho_hat=rho_hat*exp(k_sq*t/Re/Sc)
+        iuu_hat=uu_hat*exp(k_sq*t/Re)
+        ivv_hat=vv_hat*exp(k_sq*t/Re)
+        iww_hat=ww_hat*exp(k_sq*t/Re)
 !        call print_fft_matrix(p11,N)
+
 !        call print_fft_matrix(p31,N)
 !        call print_fft_matrix(cut,N)
-!        call afft2(u,u_hat)
-!        call print_fft(u_hat)
-!        u_hat=u_hat*kx*ii
-!        call ifft2(u_hat,u)
-!        call normalise(u)
+!        w_hat=w_hat*kx*ii
+!        call ifft2(w_hat,w)
+!        call normalise(w)
+        print '()'
+!        call print_mat(w)
         call dealloc_matrices()
+        call dealloc_fft()
 
 end program main

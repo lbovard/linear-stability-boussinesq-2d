@@ -5,6 +5,7 @@
 module initialise       
         use globals
         implicit none
+        include "fftw3.f03"
 contains
         ! allocate the memory  
         subroutine alloc_matrices()
@@ -15,14 +16,20 @@ contains
                 allocate(cut(Nr,N))
                 !underlying mesh
                 allocate(X(N,N),Y(N,N))
-                !velocity and density fields
-                allocate(u(N,N),v(N,N),w(N,N),rho(N,N))
+                ! initial omega and velocity values
+                allocate(om_i(N,N),u_0(N,N),v_0(N,N))
                 !projection tensors
                 allocate(p11(Nr,N),p12(Nr,N),p13(Nr,N),p21(Nr,N),p22(Nr,N),p23(Nr,N),p31(Nr,N),p32(Nr,N),p33(Nr,N))
+                ! vorticity matrices
+                allocate(om1(Nr,N),om2(Nr,N),om3(Nr,N))
+                ! integrating factor 
+                allocate(iuu_hat(Nr,N),ivv_hat(Nr,N),iww_hat(Nr,N),irho_hat(Nr,N))
+                ! time step variables
+                allocate(uu_hat_new(Nr,N),vv_hat_new(Nr,N),ww_hat_new(Nr,N),rho_hat_new(Nr,N))
         end subroutine alloc_matrices
+
         ! iniitialise wavenumber matrices
-        subroutine init_wn(ukz)
-                real, intent(in) :: ukz
+        subroutine init_wn()
                 integer :: i,j 
                 ! better on parallel machines
                 ! initialises kx,ky matrices according to fftw storage
@@ -69,11 +76,27 @@ contains
                 p21=p12
                 p31=p13
         end subroutine init_projection
-        
+       
+        subroutine init_velocities()
+                call random_number( harvest=uu(1:N,1:N))
+                call random_number( harvest=vv(1:N,1:N))
+                call random_number( harvest=ww(1:N,1:N))
+        end subroutine init_velocities 
+
         subroutine dealloc_matrices()
                 deallocate(kx,ky,kz)
                 deallocate(X,Y)
                 deallocate(p11,p12,p13,p21,p22,p23,p31,p32,p33)
         end subroutine dealloc_matrices 
-                
+       
+        ! test matrix u for debugging purposes 
+!        subroutine test(A)
+!                real(C_DOUBLE), intent(inout):: A(:,:)
+!                integer :: i,j
+!                forall(i=1:N,j=1:N) A(i,j)=1.0_8/real(i+j-1,8)
+!                do i=1,N-1
+!                        A(i,i+1)=real(i+1,8)
+!                end do
+!        end subroutine test
+        
 end module initialise
