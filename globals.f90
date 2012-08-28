@@ -6,7 +6,7 @@ module globals
         use, intrinsic :: iso_c_binding
         implicit none
         ! N must be even
-        integer, parameter :: N=256
+        integer, parameter :: N=16
         integer, parameter :: Nr=(N/2)+1
         real(kind=8) :: t_final=40.0
         integer :: n_k

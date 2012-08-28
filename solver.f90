@@ -61,6 +61,7 @@ contains
                 en=0.5_8*log(en)
          end subroutine energy
 
+        !initialise lamb dipole
         subroutine init_vorticity()      
                 real(kind=8), dimension(:,:), allocatable :: rr,rr_sq,theta
                 real(kind=8), parameter :: AA=-0.402759395702553_8, BB=3.83170597020751_8
@@ -69,25 +70,35 @@ contains
                 rr=X*X+Y*Y
                 rr_sq=sqrt(rr)
                 theta=atan2(Y,X)
+                !initialise velocities
                 do i=1,N
                         do j=1,N
-                                if(rr_sq(i,j)< 1.0_8 .and. rr_sq(i,j) /= 0.0) then
-                                        u_0(i,j)=2.0/(AA*BB*rr_sq(i,j)**3)*((X(i,j)**2-Y(i,j)**2)*bessel_j1(BB*rr_sq(i,j))+ & 
-                                        BB*Y(i,j)**2*rr_sq(i,j)*bessel_j0(BB*rr_sq(i,j)))
-                                        v_0(i,j)=-2*X(i,j)*Y(i,j)/(rr_sq(i,j)**3*BB*AA)*(-2*bessel_j1(BB*rr_sq(i,j))+ &
-                                                        BB*rr_sq(i,j)*bessel_j0(BB*rr_sq(i,j)))
-                                        om_i(i,j)=2*BB*bessel_j1(BB*rr_sq(i,j))*sin(theta(i,j))/AA
-                                else if(rr_sq(i,j) == 0.0) then
-                                        u_0(i,j)=1/AA
-                                        v_0(i,j)=0.0
+                                if(rr_sq(i,j)<1.0_8) then
+                                        u_0(i,j)=2.0_8/(AA*BB*rr_sq(i,j)**3)*((X(i,j)**2-Y(i,j)**2)*bessel_j1(BB*rr_sq(i,j)) + &
+                                        BB*Y(i,j)*Y(i,j)*rr_sq(i,j)*bessel_j0(BB*rr_sq(i,j)))
+                                        v_0(i,j)=-2.0_8*X(i,j)*Y(i,j)/(AA*BB*rr_sq(i,j)**3)*(-2.0_8*bessel_j1(BB*rr_sq(i,j)) + & 
+                                        BB*rr_sq(i,j)*bessel_j0(BB*rr_sq(i,j)))
                                 else 
-                                        u_0(i,j)=(1.0+1.0/rr(i,j))-2*X(i,j)*X(i,j)/(rr(i,j)*rr(i,j))
-                                        v_0(i,j)=-2.0*X(i,j)*Y(i,j)/(rr(i,j)*rr(i,j))
-                                        om_i(i,j)=0.0
+                                        u_0(i,j)=(1.0_8+1.0_8/rr(i,j))-2*X(i,j)**2/rr(i,j)**2
+                                        v_0(i,j)=-2.0_8*X(i,j)*Y(i,j)/rr(i,j)**2
+                                end if                                
+                                if(rr_sq(i,j) < 0.000001_8) then
+                                        u_0(i,j)=1.0_8/AA
+                                        v_0(i,j)=0.0_8
+                                end if
+                        end do
+                 end do
+                !initialise vorticity
+                do i=1,N
+                        do j=1,N
+                                if(rr_sq(i,j)<1.0_8) then
+                                        om_i(i,j)=2.0_8*BB/AA*bessel_j1(BB*rr_sq(i,j))*sin(theta(i,j))
                                 end if
                         end do
                 end do
         end subroutine init_vorticity              
+
+
 
 
 end module solver
