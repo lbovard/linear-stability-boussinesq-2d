@@ -21,22 +21,19 @@ program main
         call afft2(vv,vv_hat)
         call afft2(ww,ww_hat)
         call afft2(rho,rho_hat)
-
-        print *, 'w/o div'
-        call print_fft_matrix(uu_hat)
-        
-        call mat_w2f(u_0,"u_0.dat",N)
-        call mat_w2f(v_0,"v_0.dat",N)
-        call mat_w2f(om_i,"om_i.dat",N)
+        uu_hat_temp=uu_hat
+        vv_hat_temp=vv_hat
+        ww_hat_temp=ww_hat
         call mat_w2f(uu,"uu.dat",N)
         call mat_w2f(vv,"vv.dat",N)
         call mat_w2f(ww,"ww.dat",N)
         ! ensures divergence free
-        uu_hat=uu_hat*p11+vv_hat*p12+ww_hat*p13
-        print *, 'w/ div'
-        call print_fft_matrix(uu_hat)
-        vv_hat=uu_hat*p21+vv_hat*p22+ww_hat*p23
-        ww_hat=uu_hat*p31+vv_hat*p32+ww_hat*p33
+        uu_hat=uu_hat_temp*p11+vv_hat_temp*p12+ww_hat_temp*p13
+        vv_hat=uu_hat_temp*p21+vv_hat_temp*p22+ww_hat_temp*p23
+        ww_hat=uu_hat_temp*p31+vv_hat_temp*p32+ww_hat_temp*p33
+        call mat_w2f_c(uu_hat,"uu_hat.dat",N)        
+        call mat_w2f_c(vv_hat,"vv_hat.dat",N)        
+        call mat_w2f_c(ww_hat,"ww_hat.dat",N)        
         irho_hat=rho_hat*exp(k_sq*t/Re/Sc)
         iuu_hat=uu_hat*exp(k_sq*t/Re)
         ivv_hat=vv_hat*exp(k_sq*t/Re)
@@ -87,17 +84,3 @@ program main
 
 end program main
 
-
-subroutine mat_w2f(mat,fname,N)
-        integer, intent(in) :: N
-        real(kind=8), intent(in), dimension(N,N) :: mat 
-        character (len=*), intent(in) :: fname
-        integer :: i
-        open(unit=1,file=fname)
-        do i=1,N
-                do j=1,N
-                write(1,*), mat(i,j)
-                end do
-        end do
-        close(1)
-end subroutine mat_w2f    

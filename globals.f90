@@ -6,7 +6,7 @@ module globals
         use, intrinsic :: iso_c_binding
         implicit none
         ! N must be even
-        integer, parameter :: N=16
+        integer, parameter :: N=8
         integer, parameter :: Nr=(N/2)+1
         real(kind=8) :: t_final=40.0
         integer :: n_k
@@ -16,7 +16,7 @@ module globals
         real, parameter :: tpiL=2.0_8*pi/L
         real, parameter :: dx=L/real(N), dy=dx
         real, parameter :: dt=1e-2
-        real, parameter :: ukz=4.0
+        real, parameter :: ukz=1.0
         
         integer :: num_steps
         real(C_DOUBLE), pointer :: uu(:,:), vv(:,:), ww(:,:), rho(:,:)
@@ -30,6 +30,7 @@ module globals
         real(kind=8), dimension(:), allocatable :: growth_rate(:)
         complex, parameter :: ii=(0.0_8,1.0_8)
         complex(C_DOUBLE_COMPLEX), pointer :: uu_hat(:,:), vv_hat(:,:), ww_hat(:,:), rho_hat(:,:)
+        complex(C_DOUBLE_COMPLEX), pointer :: uu_hat_temp(:,:), vv_hat_temp(:,:), ww_hat_temp(:,:) 
         !integrating factor versions
         complex(C_DOUBLE_COMPLEX), dimension(:,:), allocatable :: iuu_hat(:,:),ivv_hat(:,:), iww_hat(:,:), irho_hat(:,:)
         !time step variables
@@ -44,4 +45,5 @@ module globals
         type(C_PTR) :: up,vp,wp,rhop,uq,vq,wq,rhoq,funcp,funcq,om1hp,om2hp,om3hp,om1p,om2p,om3p
         type(C_PTR) :: rp1,rp2,rp3,rp4,rp1_hat,rp2_hat,rp3_hat,rp4_hat
         type(C_PTR) :: A1p,B1p,C1p,A1p_hat,B1p_hat,C1p_hat
+        type(C_PTR) :: uqt,vqt,wqt
 end module globals
