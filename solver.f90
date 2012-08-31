@@ -19,11 +19,15 @@ contains
         subroutine rho_right()
                 r1_hat=exp(-k_sq*t/Re/Sc)*irho_hat
                 call ifft2(r1_hat,r1)
+                call normalise(r1)
+!                call mat_w2f(r1,"rho.dat",N)
                 r2=u_0*r1
                 r3=v_0*r2
+                r4_hat=exp(-k_sq*t/Re)*iww_hat/Fh**2
                 call afft2(r2,r2_hat)
                 call afft2(r3,r3_hat)
-                rr=exp(k_sq*t/Re/Sc)*(-ii*kx*r2_hat-ii*ky*r3_hat)
+                rr=exp(k_sq*t/Re/Sc)*(-ii*kx*r2_hat-ii*ky*r3_hat+r4_hat)
+!                call mat_w2f_c(rr,"pp_hat.dat",N)
         end subroutine rho_right
 
         subroutine vel_right()
@@ -31,10 +35,16 @@ contains
                 r2_hat=exp(-k_sq*t/Re)*ivv_hat
                 r3_hat=exp(-k_sq*t/Re)*iww_hat
                 r4_hat=exp(-k_sq*t/Re/Sc)*irho_hat
+                call mat_w2f_c(r1_hat,"uu_hat_vr.dat",N)
                 call ifft2(r1_hat,r1)
                 call ifft2(r2_hat,r2)
                 call ifft2(r3_hat,r3)
                 call ifft2(r4_hat,r4)
+                call normalise(r1)
+                call normalise(r2)
+                call normalise(r3)
+                call normalise(r4)
+                call mat_w2f(r1,"uu_vr.dat",N)
                 call omega(r1_hat,r2_hat,r3_hat)        
                 A_1=r2*om_i+v_0*om3
                 B_1=-r1*om_i-v_0*om3
@@ -43,7 +53,6 @@ contains
                 call afft2(A_1,A_1_hat)
                 call afft2(B_1,B_1_hat)
                 call afft2(C_1,C_1_hat)
-
                 ur=exp(k_sq*t/Re)*(p11*A_1_hat+p12*B_1_hat+p13*C_1_hat)
                 vr=exp(k_sq*t/Re)*(p21*A_1_hat+p22*B_1_hat+p23*C_1_hat)
                 wr=exp(k_sq*t/Re)*(p31*A_1_hat+p32*B_1_hat+p33*C_1_hat)

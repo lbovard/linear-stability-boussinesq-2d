@@ -6,16 +6,16 @@ module globals
         use, intrinsic :: iso_c_binding
         implicit none
         ! N must be even
-        integer, parameter :: N=8
+        integer, parameter :: N=64
         integer, parameter :: Nr=(N/2)+1
         real(kind=8) :: t_final=40.0
         integer :: n_k
         real, parameter :: pi=3.14159265
-        real, parameter :: Fh=0.2, Re=10000, Sc=1.0_8
+        real, parameter :: Fh=1.0_8, Re=10000, Sc=1.0_8
         real, parameter :: L=9.0
         real, parameter :: tpiL=2.0_8*pi/L
         real, parameter :: dx=L/real(N), dy=dx
-        real, parameter :: dt=1e-2
+        real, parameter :: dt=0.0019_8
         real, parameter :: ukz=1.0
         
         integer :: num_steps

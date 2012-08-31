@@ -21,6 +21,7 @@ program main
         call afft2(vv,vv_hat)
         call afft2(ww,ww_hat)
         call afft2(rho,rho_hat)
+        
         uu_hat_temp=uu_hat
         vv_hat_temp=vv_hat
         ww_hat_temp=ww_hat
@@ -31,26 +32,30 @@ program main
         uu_hat=uu_hat_temp*p11+vv_hat_temp*p12+ww_hat_temp*p13
         vv_hat=uu_hat_temp*p21+vv_hat_temp*p22+ww_hat_temp*p23
         ww_hat=uu_hat_temp*p31+vv_hat_temp*p32+ww_hat_temp*p33
-        call mat_w2f_c(uu_hat,"uu_hat.dat",N)        
-        call mat_w2f_c(vv_hat,"vv_hat.dat",N)        
-        call mat_w2f_c(ww_hat,"ww_hat.dat",N)        
+
+        !convert to integrating factors
         irho_hat=rho_hat*exp(k_sq*t/Re/Sc)
         iuu_hat=uu_hat*exp(k_sq*t/Re)
         ivv_hat=vv_hat*exp(k_sq*t/Re)
         iww_hat=ww_hat*exp(k_sq*t/Re)
+
         call rho_right() 
         irho_hat_new=irho_hat+dt*rr
+
         call vel_right() 
         iuu_hat_new=iuu_hat+dt*ur
         ivv_hat_new=ivv_hat+dt*vr
         iww_hat_new=iww_hat+dt*wr
 
-
+!        call mat_w2f_c(ivv_hat_new,"vv_hat.dat",N)        
+!        call mat_w2f_c(iww_hat_new,"ww_hat.dat",N)        
+!
         ! update scheme
         iuu_hat=iuu_hat_new
         ivv_hat=ivv_hat_new
         iww_hat=iww_hat_new
         irho_hat=irho_hat_new
+!        call mat_w2f_c(irho_hat,"pp_hat.dat",N)        
         rr_old=rr
         ur_old=ur
         vr_old=vr

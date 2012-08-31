@@ -25,7 +25,8 @@ contains
                 ! time step variables
                 allocate(iuu_hat_new(Nr,N),ivv_hat_new(Nr,N),iww_hat_new(Nr,N),irho_hat_new(Nr,N))
                 ! right side variables
-                allocate(rr(N,N),ur(N,N),vr(N,N),wr(N,N))
+               ! allocate(rr(N,N),ur(N,N),vr(N,N),wr(N,N))
+                allocate(rr(Nr,N),ur(Nr,N),vr(Nr,N),wr(Nr,N))
                 allocate(rr_old(N,N),ur_old(N,N),vr_old(N,N),wr_old(N,N))
                 allocate(growth_rate(N))
         end subroutine alloc_matrices
