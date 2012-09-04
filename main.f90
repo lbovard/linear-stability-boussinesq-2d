@@ -17,22 +17,40 @@ program main
         call init_velocities()
         call init_vorticity()
 
+        call mat_w2f(uu,"uu_init.dat",N)
+        call mat_w2f(vv,"vv_init.dat",N)
+        call mat_w2f(ww,"ww_init.dat",N)
+
         call afft2(uu,uu_hat)
         call afft2(vv,vv_hat)
         call afft2(ww,ww_hat)
-        call afft2(rho,rho_hat)
         
+!        call mat_w2f_c(uu_hat,"uu_hat.dat",N)
+!        call mat_w2f_c(vv_hat,"vv_hat.dat",N)
+!        call mat_w2f_c(ww_hat,"ww_hat.dat",N)
+
+
+!        call ifft2(uu_hat,r1)
+!        call ifft2(vv_hat,r2)
+!        call ifft2(ww_hat,r3)
+!        
+!        call normalise(r1)
+!        call normalise(r2)
+!        call normalise(r3)
+        call init_fft()
+!        call mat_w2f(r1,"uu.dat",N)
+!        call mat_w2f(r2,"vv.dat",N)
+!        call mat_w2f(r3,"ww.dat",N)
+
+
+        call afft2(rho,rho_hat)
         uu_hat_temp=uu_hat
         vv_hat_temp=vv_hat
         ww_hat_temp=ww_hat
-        call mat_w2f(uu,"uu.dat",N)
-        call mat_w2f(vv,"vv.dat",N)
-        call mat_w2f(ww,"ww.dat",N)
         ! ensures divergence free
         uu_hat=uu_hat_temp*p11+vv_hat_temp*p12+ww_hat_temp*p13
         vv_hat=uu_hat_temp*p21+vv_hat_temp*p22+ww_hat_temp*p23
         ww_hat=uu_hat_temp*p31+vv_hat_temp*p32+ww_hat_temp*p33
-
         !convert to integrating factors
         irho_hat=rho_hat*exp(k_sq*t/Re/Sc)
         iuu_hat=uu_hat*exp(k_sq*t/Re)

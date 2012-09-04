@@ -4,8 +4,9 @@
 
 module initialise       
         use globals
+        use display
         implicit none
-        include "fftw3.f03"
+       ! include "fftw3.f03"
 contains
         ! allocate the memory  
         subroutine alloc_matrices()
@@ -43,7 +44,6 @@ contains
                 ky(Nr,:)=0.0_8
                 k_sq=kx*kx+ky*ky+kz*kz
                 kinv_sq=1.0_8/k_sq
-
                 !dealiasing information using 2/3s rule
                 n_k=ceiling(2.0/3.0*N)
                 if(mod(n_k,2)==1) then

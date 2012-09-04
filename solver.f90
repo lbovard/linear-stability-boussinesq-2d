@@ -31,11 +31,16 @@ contains
         end subroutine rho_right
 
         subroutine vel_right()
+                r1=0_8
+                r2=0_8
+                r3=0_8
                 r1_hat=exp(-k_sq*t/Re)*iuu_hat
                 r2_hat=exp(-k_sq*t/Re)*ivv_hat
                 r3_hat=exp(-k_sq*t/Re)*iww_hat
                 r4_hat=exp(-k_sq*t/Re/Sc)*irho_hat
-                call mat_w2f_c(r1_hat,"uu_hat_vr.dat",N)
+                call mat_w2f_c(r1_hat,"uu_hat.dat",N)
+                call mat_w2f_c(r2_hat,"vv_hat.dat",N)
+                call mat_w2f_c(r3_hat,"ww_hat.dat",N)
                 call ifft2(r1_hat,r1)
                 call ifft2(r2_hat,r2)
                 call ifft2(r3_hat,r3)
@@ -45,6 +50,12 @@ contains
                 call normalise(r3)
                 call normalise(r4)
                 call mat_w2f(r1,"uu_vr.dat",N)
+                call mat_w2f(r2,"vv_vr.dat",N)
+                call mat_w2f(r3,"ww_vr.dat",N)
+                call afft2(r1,r1_hat)
+                call afft2(r2,r2_hat)
+                call afft2(r3,r3_hat)
+                call afft2(r4,r4_hat)
                 call omega(r1_hat,r2_hat,r3_hat)        
                 A_1=r2*om_i+v_0*om3
                 B_1=-r1*om_i-v_0*om3

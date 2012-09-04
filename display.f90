@@ -1,6 +1,5 @@
 module display
         use globals
-        use fft_routines
         implicit none
         
 contains 

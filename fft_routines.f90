@@ -82,35 +82,37 @@ contains
 
         ! initialises fft routines
         subroutine init_fft()
-                forward=fftw_plan_dft_r2c_2d(N,N,func,func_hat,FFTW_ESTIMATE)
-                inverse=fftw_plan_dft_c2r_2d(N,N,func_hat,func,FFTW_ESTIMATE)
+!                forward=fftw_plan_dft_r2c_2d(N,N,func,func_hat,FFTW_ESTIMATE)
+!                inverse=fftw_plan_dft_c2r_2d(N,N,func_hat,func,FFTW_ESTIMATE)
+                forward=fftw_plan_dft_r2c_2d(N,N,uu,uu_hat,FFTW_ESTIMATE)
+                inverse=fftw_plan_dft_c2r_2d(N,N,uu_hat,uu,FFTW_ESTIMATE)
         end subroutine init_fft
         
         ! 2d unaliased fft
         subroutine fft2(A,A_hat) 
-                real(C_DOUBLE), intent(inout) :: A(:,:)
-                complex(C_DOUBLE_COMPLEX), intent(inout) :: A_hat(:,:)
+                real(C_DOUBLE), pointer, intent(inout) :: A(:,:)
+                complex(C_DOUBLE_COMPLEX), pointer,  intent(inout) :: A_hat(:,:)
                 call fftw_execute_dft_r2c(forward,A,A_hat)
         end subroutine fft2
        
         ! 2d aliased fft 
         subroutine afft2(A,A_hat) 
-                real(C_DOUBLE), intent(inout) :: A(:,:)
-                complex(C_DOUBLE_COMPLEX), intent(inout) :: A_hat(:,:)
+                real(C_DOUBLE), pointer, intent(inout) :: A(:,:)
+                complex(C_DOUBLE_COMPLEX), pointer,  intent(inout) :: A_hat(:,:)
                 call fftw_execute_dft_r2c(forward,A,A_hat)
                 A_hat=A_hat*cut
         end subroutine afft2
         
         ! 2d ifft
         subroutine ifft2(A_hat,A) 
-                real(C_DOUBLE), intent(inout) :: A(:,:)
-                complex(C_DOUBLE_COMPLEX), intent(inout) :: A_hat(:,:)
+                real(C_DOUBLE), pointer, intent(inout) :: A(:,:)
+                complex(C_DOUBLE_COMPLEX), pointer, intent(inout) :: A_hat(:,:)
                 call fftw_execute_dft_c2r(inverse,A_hat,A)
         end subroutine ifft2
 
         ! normalise fft since FFTW does not
         subroutine normalise(A)
-                real(C_DOUBLE), intent(inout) :: A(:,:)
+                real(C_DOUBLE), pointer, intent(inout) :: A(:,:)
                 A=A/real(N*N,8) 
         end subroutine normalise 
 
