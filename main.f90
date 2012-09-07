@@ -7,7 +7,6 @@ program main
         implicit none
         integer :: i,j
        ! num_steps=floor(t_final/dt)
-        num_steps=1
         call alloc_matrices()
         call alloc_fft()
         call init_fft()
@@ -17,30 +16,15 @@ program main
         call init_velocities()
         call init_vorticity()
 
-        call mat_w2f(uu,"uu_init.dat",N)
-        call mat_w2f(vv,"vv_init.dat",N)
-        call mat_w2f(ww,"ww_init.dat",N)
+        call mat_w2f_c(uu,"uu_init.dat",N)
+        call mat_w2f_c(vv,"vv_init.dat",N)
+        call mat_w2f_c(ww,"ww_init.dat",N)
 
         call afft2(uu,uu_hat)
         call afft2(vv,vv_hat)
         call afft2(ww,ww_hat)
         
-!        call mat_w2f_c(uu_hat,"uu_hat.dat",N)
-!        call mat_w2f_c(vv_hat,"vv_hat.dat",N)
-!        call mat_w2f_c(ww_hat,"ww_hat.dat",N)
-
-
-!        call ifft2(uu_hat,r1)
-!        call ifft2(vv_hat,r2)
-!        call ifft2(ww_hat,r3)
-!        
-!        call normalise(r1)
-!        call normalise(r2)
-!        call normalise(r3)
         call init_fft()
-!        call mat_w2f(r1,"uu.dat",N)
-!        call mat_w2f(r2,"vv.dat",N)
-!        call mat_w2f(r3,"ww.dat",N)
 
 
         call afft2(rho,rho_hat)
@@ -61,49 +45,55 @@ program main
         irho_hat_new=irho_hat+dt*rr
 
         call vel_right() 
+        
         iuu_hat_new=iuu_hat+dt*ur
         ivv_hat_new=ivv_hat+dt*vr
         iww_hat_new=iww_hat+dt*wr
 
-!        call mat_w2f_c(ivv_hat_new,"vv_hat.dat",N)        
-!        call mat_w2f_c(iww_hat_new,"ww_hat.dat",N)        
 !
         ! update scheme
         iuu_hat=iuu_hat_new
         ivv_hat=ivv_hat_new
         iww_hat=iww_hat_new
         irho_hat=irho_hat_new
-!        call mat_w2f_c(irho_hat,"pp_hat.dat",N)        
         rr_old=rr
         ur_old=ur
         vr_old=vr
         wr_old=wr
-!
-!        do i=1,num_steps
-!                t=dt*real(i,8)
-!
-!                call rho_right()
-!                irho_hat_new=irho_hat+1.5_8*dt*rr-0.5_8*dt*rr_old
-!                call vel_right()
-!                iuu_hat_new=iuu_hat+1.5_8*dt*ur-0.5_8*dt*ur_old
-!                ivv_hat_new=ivv_hat+1.5_8*dt*vr-0.5_8*dt*vr_old
-!                iww_hat_new=iww_hat+1.5_8*dt*wr-0.5_8*dt*wr_old
-!        
-!                !update scheme
-!                iuu_hat=iuu_hat_new
-!                ivv_hat=ivv_hat_new
-!                iww_hat=iww_hat_new
-!                irho_hat=irho_hat_new
-!                rr_old=rr
-!                ur_old=ur
-!                vr_old=vr
-!                wr_old=wr
-!                call energy()
-!                growth_rate(i)=en
-!                print *, en
-!        end do 
-        call dealloc_matrices()
-        call dealloc_fft()
 
+        num_steps=floor(t_final/dt)
+!        num_steps=10
+        print *, num_steps
+        do i=1,num_steps
+                print *, i
+                t=dt*cmplx(i,0,8)
+
+                call rho_right()
+                irho_hat_new=irho_hat+1.5_8*dt*rr-0.5_8*dt*rr_old
+                call vel_right()
+                iuu_hat_new=iuu_hat+1.5_8*dt*ur-0.5_8*dt*ur_old
+                ivv_hat_new=ivv_hat+1.5_8*dt*vr-0.5_8*dt*vr_old
+                iww_hat_new=iww_hat+1.5_8*dt*wr-0.5_8*dt*wr_old
+        
+                !update scheme
+                iuu_hat=iuu_hat_new
+                ivv_hat=ivv_hat_new
+                iww_hat=iww_hat_new
+                irho_hat=irho_hat_new
+                rr_old=rr
+                ur_old=ur
+                vr_old=vr
+                wr_old=wr
+                call energy()
+                growth_rate(i)=en
+        end do 
+!        call dealloc_matrices()
+!        call dealloc_fft()
+
+        call mat_w2f_c(irho_hat,"irho_hat.dat",N)        
+        call mat_w2f_c(iuu_hat,"iuu_hat.dat",N)        
+        call mat_w2f_c(ivv_hat,"ivv_hat.dat",N)        
+        call mat_w2f_c(iww_hat,"iww_hat.dat",N)        
+        call w2f(growth_rate,"energy.dat",num_steps)
 end program main
 

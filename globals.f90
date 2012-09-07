@@ -6,30 +6,30 @@ module globals
         use, intrinsic :: iso_c_binding
         implicit none
         ! N must be even
-        integer, parameter :: N=8
+        integer, parameter :: N=256
         integer, parameter :: Nr=(N/2)+1
         real(kind=8) :: t_final=40.0_8
         integer :: n_k
         real(kind=8), parameter :: pi=3.14159265358979323846264338328_8
-        real(kind=8), parameter :: Fh=1.0_8, Re=10000_8, Sc=1.0_8
+        real(kind=8), parameter :: Fh=0.2_8, Re=10000_8, Sc=1.0_8
         real(kind=8), parameter :: L=9.0_8
         real(kind=8), parameter :: tpiL=2.0_8*pi/L
         real(kind=8), parameter :: dx=L/real(N), dy=dx
         real(kind=8), parameter :: dt=0.0019_8
-        real(kind=8), parameter :: ukz=1.0_8
+        real(kind=8), parameter :: ukz=1.4_8
         
         integer :: num_steps
-        real(C_DOUBLE), pointer :: uu(:,:), vv(:,:), ww(:,:), rho(:,:)
-        real(C_DOUBLE), pointer :: om1(:,:),om2(:,:),om3(:,:)
-        real(C_DOUBLE), pointer :: r1(:,:),r2(:,:),r3(:,:),r4(:,:)
-        real(C_DOUBLE), pointer :: A_1(:,:),B_1(:,:),C_1(:,:)
         real(kind=8), dimension(:,:), allocatable :: X,Y
         complex(kind=8), dimension(:,:), allocatable :: kx,ky,kz,k_sq,kinv_sq,cut
         complex(kind=8), dimension(:,:), allocatable :: p11,p12,p13,p21,p22,p23,p31,p32,p33
-        real(kind=8), dimension(:,:), allocatable :: om_i,u_0,v_0
+        complex(kind=8), dimension(:,:), allocatable :: om_i,u_0,v_0
         real(kind=8) :: t=0.0_8, en
         real(kind=8), dimension(:), allocatable :: growth_rate(:)
         complex(kind=8), parameter :: ii=(0.0_8,1.0_8)
+        complex(C_DOUBLE_COMPLEX), pointer :: uu(:,:), vv(:,:), ww(:,:), rho(:,:)
+        complex(C_DOUBLE_COMPLEX), pointer :: om1(:,:),om2(:,:),om3(:,:)
+        complex(C_DOUBLE_COMPLEX), pointer :: r1(:,:),r2(:,:),r3(:,:),r4(:,:)
+        complex(C_DOUBLE_COMPLEX), pointer :: A_1(:,:),B_1(:,:),C_1(:,:)
         complex(C_DOUBLE_COMPLEX), pointer :: uu_hat(:,:), vv_hat(:,:), ww_hat(:,:), rho_hat(:,:)
         complex(C_DOUBLE_COMPLEX), pointer :: uu_hat_temp(:,:), vv_hat_temp(:,:), ww_hat_temp(:,:) 
         !integrating factor versions

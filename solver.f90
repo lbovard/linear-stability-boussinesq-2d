@@ -19,7 +19,6 @@ contains
         subroutine rho_right()
                 r1_hat=exp(-k_sq*t/Re/Sc)*irho_hat
                 call ifft2(r1_hat,r1)
-                call normalise(r1)
 !                call mat_w2f(r1,"rho.dat",N)
                 r2=u_0*r1
                 r3=v_0*r2
@@ -31,42 +30,37 @@ contains
         end subroutine rho_right
 
         subroutine vel_right()
-                r1=0_8
-                r2=0_8
-                r3=0_8
+!                call mat_w2f_c(iuu_hat,"uu_hat.dat",N)
+!                call mat_w2f_c(ivv_hat,"vv_hat.dat",N)
+!                call mat_w2f_c(iww_hat,"ww_hat.dat",N)
                 r1_hat=exp(-k_sq*t/Re)*iuu_hat
                 r2_hat=exp(-k_sq*t/Re)*ivv_hat
                 r3_hat=exp(-k_sq*t/Re)*iww_hat
                 r4_hat=exp(-k_sq*t/Re/Sc)*irho_hat
-                call mat_w2f_c(r1_hat,"uu_hat.dat",N)
-                call mat_w2f_c(r2_hat,"vv_hat.dat",N)
-                call mat_w2f_c(r3_hat,"ww_hat.dat",N)
                 call ifft2(r1_hat,r1)
                 call ifft2(r2_hat,r2)
                 call ifft2(r3_hat,r3)
                 call ifft2(r4_hat,r4)
-                call normalise(r1)
-                call normalise(r2)
-                call normalise(r3)
-                call normalise(r4)
-                call mat_w2f(r1,"uu_vr.dat",N)
-                call mat_w2f(r2,"vv_vr.dat",N)
-                call mat_w2f(r3,"ww_vr.dat",N)
                 call afft2(r1,r1_hat)
                 call afft2(r2,r2_hat)
                 call afft2(r3,r3_hat)
                 call afft2(r4,r4_hat)
                 call omega(r1_hat,r2_hat,r3_hat)        
                 A_1=r2*om_i+v_0*om3
-                B_1=-r1*om_i-v_0*om3
-                C_1=u_0*om1-v_0*om1
+                B_1=-r1*om_i-u_0*om3
+                C_1=u_0*om2-v_0*om1
+
+
 
                 call afft2(A_1,A_1_hat)
                 call afft2(B_1,B_1_hat)
                 call afft2(C_1,C_1_hat)
+                C_1_hat=C_1_hat-r4_hat
+
                 ur=exp(k_sq*t/Re)*(p11*A_1_hat+p12*B_1_hat+p13*C_1_hat)
                 vr=exp(k_sq*t/Re)*(p21*A_1_hat+p22*B_1_hat+p23*C_1_hat)
                 wr=exp(k_sq*t/Re)*(p31*A_1_hat+p32*B_1_hat+p33*C_1_hat)
+
         end subroutine vel_right
 
         subroutine energy()
