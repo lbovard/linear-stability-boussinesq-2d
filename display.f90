@@ -18,7 +18,7 @@ contains
         subroutine print_fft_matrix(A)
                 implicit none
                 complex(C_DOUBLE_COMPLEX), intent(in) :: A((N/2+1),N)
-                integer :: i,j
+                integer :: i
                 do i=1,Nr
                         print '(50f8.4)', A(i,1:N) 
                 end do
@@ -42,7 +42,7 @@ contains
                 integer, intent(in) :: N
                 real(kind=8), intent(in), dimension(N) :: mat 
                 character (len=*), intent(in) :: fname
-                integer :: i,j
+                integer :: i
                 open(unit=1,file=fname)
                 do i=1,N
                         write(1,*), mat(i)

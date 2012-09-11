@@ -10,14 +10,12 @@ module initialise
 contains
         ! allocate the memory  
         subroutine alloc_matrices()
-                allocate(kx(N,N),ky(N,N),kz(N,N))
-                allocate(k_sq(N,N))
-                allocate(kinv_sq(N,N))
-                allocate(cut(N,N))
+                allocate(kx(N,N),ky(N,N),kz(N,N),k_sq(N,N),kinv_sq(N,N),cut(N,N))
                 !underlying mesh
                 allocate(X(N,N),Y(N,N))
                 ! initial omega and velocity values
                 allocate(om_i(N,N),u_0(N,N),v_0(N,N))
+                allocate(uu_hat_temp(N,N),vv_hat_temp(N,N),ww_hat_temp(N,N)) 
                 !projection tensors
                 allocate(p11(N,N),p12(N,N),p13(N,N),p21(N,N),p22(N,N),p23(N,N),p31(N,N),p32(N,N),p33(N,N))
                 ! integrating factor 
@@ -28,7 +26,8 @@ contains
                ! allocate(rr(N,N),ur(N,N),vr(N,N),wr(N,N))
                 allocate(rr(N,N),ur(N,N),vr(N,N),wr(N,N))
                 allocate(rr_old(N,N),ur_old(N,N),vr_old(N,N),wr_old(N,N))
-                allocate(growth_rate(N))
+                allocate(growth_rate(num_steps))
+                allocate(tote(num_steps))
         end subroutine alloc_matrices
 
         ! iniitialise wavenumber matrices
@@ -89,18 +88,6 @@ contains
         
         !deallocate memory
         subroutine dealloc_matrices()
-                deallocate(kx,ky,kz)
-                deallocate(k_sq)
-                deallocate(kinv_sq)
-                deallocate(cut)
-                deallocate(X,Y)
-                deallocate(om_i,u_0,v_0)
-                deallocate(p11,p12,p13,p21,p22,p23,p31,p32,p33)
-                deallocate(iuu_hat,ivv_hat,iww_hat,irho_hat)
-                deallocate(iuu_hat_new,ivv_hat_new,iww_hat_new,irho_hat_new)
-                deallocate(rr,ur,vr,wr)
-                deallocate(rr_old,ur_old,vr_old,wr_old)
-                deallocate(growth_rate)
         end subroutine dealloc_matrices 
        
         

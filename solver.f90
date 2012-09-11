@@ -37,6 +37,7 @@ contains
                 r2_hat=exp(-k_sq*t/Re)*ivv_hat
                 r3_hat=exp(-k_sq*t/Re)*iww_hat
                 r4_hat=exp(-k_sq*t/Re/Sc)*irho_hat
+                call energy()
                 call ifft2(r1_hat,r1)
                 call ifft2(r2_hat,r2)
                 call ifft2(r3_hat,r3)
@@ -68,7 +69,7 @@ contains
                 en=0.0
                 do i=1,N
                         do j=1,N
-                                en=en+abs(r1(i,j))**2+abs(r2(i,j))**2+abs(r3(i,j))**2
+                                en=en+abs(r1_hat(i,j))**2+abs(r2_hat(i,j))**2+abs(r3_hat(i,j))**2
                         end do
                 end do
 

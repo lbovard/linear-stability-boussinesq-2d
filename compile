@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#gfortran globals.f90 display.f90 initialise.f90 fft_routines.f90 solver.f90 main.f90 -I/usr/local/include -L/usr/local/lib -lfftw3 -lm -Wall -pedantic 
-gfortran globals.f90 display.f90 initialise.f90 fft_routines.f90 solver.f90 main.f90 -I/usr/local/include -L/usr/local/lib -lfftw3 -lm 
+gfortran globals.f90 display.f90 initialise.f90 fft_routines.f90 solver.f90 main.f90 -I/usr/local/include -L/usr/local/lib -lfftw3 -lm -Wall -pedantic  -Warray-bounds -fbounds-check
+#gfortran globals.f90 display.f90 initialise.f90 fft_routines.f90 solver.f90 main.f90 -I/usr/local/include -L/usr/local/lib -lfftw3 -lm 
 
 rm -f *.dat
