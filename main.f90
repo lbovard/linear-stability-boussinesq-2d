@@ -18,6 +18,7 @@ program main
         call mat_w2f_c(uu,"uu_init.dat",N)
         call mat_w2f_c(vv,"vv_init.dat",N)
         call mat_w2f_c(ww,"ww_init.dat",N)
+        call mat_w2f_c(rho,"rho_init.dat",N)
 
         call afft2(uu,uu_hat)
         call afft2(vv,vv_hat)
@@ -36,10 +37,9 @@ program main
         iuu_hat=uu_hat*exp(k_sq*t/Re)
         ivv_hat=vv_hat*exp(k_sq*t/Re)
         iww_hat=ww_hat*exp(k_sq*t/Re)
-
+        
         call rho_right() 
         irho_hat_new=irho_hat+dt*rr
-
         call vel_right() 
         
         iuu_hat_new=iuu_hat+dt*ur
@@ -56,9 +56,6 @@ program main
         ur_old=ur
         vr_old=vr
         wr_old=wr
-
-!        num_steps=5000
-!        num_steps=10
         print *, num_steps
         print *, dt
         print *, dx
@@ -103,8 +100,12 @@ program main
                ! call mat_w2f_c(r3,"vv.dat",N)        
                ! call mat_w2f_c(r4,"ww.dat",N)        
         end do 
-!        call dealloc_matrices()
-!        call dealloc_fft()
+        call mat_w2f_c(iuu_hat,"iuu_hat.dat",N)
+        call mat_w2f_c(ivv_hat,"ivv_hat.dat",N)
+        call mat_w2f_c(iww_hat,"iww_hat.dat",N)
+        call mat_w2f_c(irho_hat,"irho_hat.dat",N)
+!!        call dealloc_matrices()
+!!        call dealloc_fft()
         call w2f(tote,"tote.dat",num_steps)
         call w2f(growth_rate,"energy.dat",num_steps)
 end program main

@@ -53,13 +53,14 @@ contains
 
         !initialise the grid 
         subroutine init_grid()
-                real, dimension(N) :: xx
+                real(kind=8), dimension(N) :: xx
                 integer ::  i,j
                 do i=1,N
-                        xx(i)=-L/2+dx*real(i)
+                        xx(i)=-L/2.0_8+dx*real(i,8)
                 end do
                 forall(i=1:N,j=1:N) X(i,j)=xx(j)
                 Y=transpose(X)
+
         end subroutine init_grid
 
         !initialise the projection tensor        

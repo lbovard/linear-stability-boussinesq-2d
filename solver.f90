@@ -21,7 +21,7 @@ contains
                 call ifft2(r1_hat,r1)
 !                call mat_w2f(r1,"rho.dat",N)
                 r2=u_0*r1
-                r3=v_0*r2
+                r3=v_0*r1
                 r4_hat=exp(-k_sq*t/Re)*iww_hat/Fh**2
                 call afft2(r2,r2_hat)
                 call afft2(r3,r3_hat)
@@ -51,8 +51,6 @@ contains
                 B_1=-r1*om_i-u_0*om3
                 C_1=u_0*om2-v_0*om1
 
-
-
                 call afft2(A_1,A_1_hat)
                 call afft2(B_1,B_1_hat)
                 call afft2(C_1,C_1_hat)
@@ -72,7 +70,6 @@ contains
                                 en=en+abs(r1_hat(i,j))**2+abs(r2_hat(i,j))**2+abs(r3_hat(i,j))**2
                         end do
                 end do
-
                 en=0.5_8*log(en)
          end subroutine energy
 
@@ -107,6 +104,7 @@ contains
                 do i=1,N
                         do j=1,N
                                 if(rr_sq(i,j)<1.0_8) then
+                                       !om_i(i,j)=2.0_8*BB/AA*bessel_j1(BB*rr_sq(i,j))*sin(theta(i,j))
                                         om_i(i,j)=2.0_8*BB/AA*bessel_j1(BB*rr_sq(i,j))*sin(theta(i,j))
                                 end if
                         end do
