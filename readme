@@ -2,9 +2,17 @@ This is linear stability code that solves the Boussinesq Navier-Stokes (BNS) equ
 
 The idea is to take the BNS equations and derive the linear stability equations. From there, we numerically solve the equations for long term behaviour to determine the growth rate of the fastest growing mode. 
 
+Method:
+This code uses spectral methods w/ 2/3 de-aliasing rule to evaluate derivatives. Pressure is eliminated via projection in the fourier plane. The time stepping is done via a 2nd order Adams-Bashforth scheme. We solve for u,v,w,rho and the growth rate of the linear perturbation.  
+The equations solved are 3.3 - 3.4 of Billan and Chomaz 2000c. 
+
 To do:
 make it parallel
 optimise it a bit
+document better
+
+
+This code is currently run on the supercomputing cluster Sharcnet. 
 
 References:
 
