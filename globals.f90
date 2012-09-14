@@ -9,17 +9,15 @@ module globals
         integer, parameter :: N=256
         integer, parameter :: Nr=(N/2)+1
         integer :: n_k, num_steps
-        real(kind=8) :: t_final=25.0_8
+        real(kind=8) :: t_final=30.0_8
         real(kind=8), parameter :: pi=3.14159265358979323846264338328_8
         real(kind=8), parameter :: Fh=0.2_8, Re=10000_8, Sc=1.0_8
         real(kind=8), parameter :: L=9.0_8
         real(kind=8), parameter :: tpiL=2.0_8*pi/L
         real(kind=8), parameter :: dx=L/real(N,8), dy=dx
         real(kind=8), parameter :: dt=0.0019_8/2.0_8
-        real(kind=8), parameter :: ukz=4._8
-        real(kind=8) :: t=0.0_8, en, prev_en
+        real(kind=8) :: t=0.0_8, en, prev_en, ukz
         complex(kind=8), parameter :: ii=(0.0_8,1.0_8)
-
 
         real(kind=8), dimension(:), allocatable :: growth_rate(:),tote(:)
         real(kind=8), dimension(:,:), allocatable :: X,Y
@@ -35,20 +33,11 @@ module globals
         complex(C_DOUBLE_COMPLEX), pointer :: r1(:,:),r2(:,:),r3(:,:),r4(:,:)
         complex(C_DOUBLE_COMPLEX), pointer :: A_1(:,:),B_1(:,:),C_1(:,:)
         complex(C_DOUBLE_COMPLEX), pointer :: uu_hat(:,:), vv_hat(:,:), ww_hat(:,:), rho_hat(:,:)
-!        complex(C_DOUBLE_COMPLEX), pointer :: uu_hat_temp(:,:), vv_hat_temp(:,:), ww_hat_temp(:,:) 
-        !integrating factor versions
         complex(C_DOUBLE_COMPLEX), dimension(:,:), allocatable :: iuu_hat(:,:),ivv_hat(:,:), iww_hat(:,:), irho_hat(:,:)
-        !time step variables
-!        complex(C_DOUBLE_COMPLEX), dimension(:,:), allocatable :: iuu_hat_new(:,:), ivv_hat_new(:,:), iww_hat_new(:,:), &
-!                irho_hat_new(:,:)
-        ! new variables
-!        complex(C_DOUBLE_COMPLEX), dimension(:,:), allocatable :: rr(:,:),ur(:,:),vr(:,:),wr(:,:)
-!        complex(C_DOUBLE_COMPLEX), dimension(:,:), allocatable :: rr_old(:,:),ur_old(:,:),vr_old(:,:),wr_old(:,:)
         complex(C_DOUBLE_COMPLEX), pointer :: om1_hat(:,:),om2_hat(:,:),om3_hat(:,:)
         complex(C_DOUBLE_COMPLEX), pointer :: r1_hat(:,:), r2_hat(:,:),r3_hat(:,:),r4_hat(:,:)
         complex(C_DOUBLE_COMPLEX), pointer :: A_1_hat(:,:), B_1_hat(:,:),C_1_hat(:,:)
         type(C_PTR) :: up,vp,wp,rhop,uq,vq,wq,rhoq,funcp,funcq,om1hp,om2hp,om3hp,om1p,om2p,om3p
         type(C_PTR) :: rp1,rp2,rp3,rp4,rp1_hat,rp2_hat,rp3_hat,rp4_hat
         type(C_PTR) :: A1p,B1p,C1p,A1p_hat,B1p_hat,C1p_hat
-!        type(C_PTR) :: uqt,vqt,wqt
 end module globals
