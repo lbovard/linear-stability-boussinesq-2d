@@ -10,6 +10,8 @@ module globals
         integer, parameter :: Nr=(N/2)+1
         integer :: n_k, num_steps
         real(kind=8) :: t_final=60.0_8
+
+        ! here is a new comment
         real(kind=8), parameter :: pi=3.14159265358979323846264338328_8
         real(kind=8), parameter :: Fh=0.2_8, Re=10000_8, Sc=1.0_8
         real(kind=8), parameter :: L=9.0_8
