@@ -5,32 +5,38 @@ program main
         use display
         use solver
         integer :: i
-        character(len=32) :: arg
+        character(len=32) :: arg,kzs,Ns
         character(len=20) :: outputname 
-
+        
+        !get kz,Fh,Re,N from command line 
         i=command_argument_count()
-        if(i /= 1) then
+        if(i /= 4) then
                 print *, "ERROR: insufficient cl arguments"
                 call EXIT(0)
         end if
-        call get_command_argument(i,arg)
-        read(arg,'(g5.2)') ukz
-        print *, outputname
+        call get_command_argument(1,kzs)
+        read(kzs,'(g5.2)') ukz
+        call get_command_argument(2,arg)
+        read(arg,'(g5.2)') Fh
+        call get_command_argument(3,arg)
+        read(arg,'(g7.2)') Re
+        call get_command_argument(4,Ns)
+        read(Ns,'(i4)') N
+
+        dx=L/real(N,8)
+        dy=dx
 
         num_steps=floor(t_final/dt)
+
+        !allocate
         call alloc_matrices()
         call alloc_fft()
         call init_fft()
         call init_wn()
         call init_grid()
         call init_projection()
-        call init_velocities()
+        call init_conditions(cont,kzs)
         call init_vorticity()
-
-!        call mat_w2f_c(uu,"uu_init.dat",N)
-!        call mat_w2f_c(vv,"vv_init.dat",N)
-!        call mat_w2f_c(ww,"ww_init.dat",N)
-!        call mat_w2f_c(rho,"rho_init.dat",N)
 
         call afft2(uu,uu_hat)
         call afft2(vv,vv_hat)
@@ -51,7 +57,8 @@ program main
         iuu_hat=uu_hat*exp(k_sq*t/Re)
         ivv_hat=vv_hat*exp(k_sq*t/Re)
         iww_hat=ww_hat*exp(k_sq*t/Re)
-        
+
+        !Euler method for first step        
         call rho_right() 
         irho_hat_new=irho_hat+dt*rr
         call vel_right() 
@@ -70,19 +77,18 @@ program main
         ur_old=ur
         vr_old=vr
         wr_old=wr
-        print *, num_steps
-        print *, ukz
-        print *, dt
-        print *, dx
+
         prev_en=0._8 
+        outputname='kz.'//trim(kzs)//'_data_'//trim(Ns)//'.dat'
+        num_steps=1
         do i=1,num_steps
-                print *,i 
                 t=dt*cmplx(i,0,8)
 
+                !apply Adams-Basforth 2nd order time-stepping
                 call rho_right()
                 irho_hat_new=irho_hat+1.5_8*dt*rr-0.5_8*dt*rr_old
-
                 call vel_right()
+        
                 iuu_hat_new=iuu_hat+1.5_8*dt*ur-0.5_8*dt*ur_old
                 ivv_hat_new=ivv_hat+1.5_8*dt*vr-0.5_8*dt*vr_old
                 iww_hat_new=iww_hat+1.5_8*dt*wr-0.5_8*dt*wr_old
@@ -96,10 +102,17 @@ program main
                 ur_old=ur
                 vr_old=vr
                 wr_old=wr
+
                 tote(i)=en
                 growth_rate(i)=(en-prev_en)/dt 
+                ! every 100 time steps dump some info 
+                if (mod(i,100)==0) then
+                        call data_w2f(growth_rate(i),outputname,i)
+                end if
                 prev_en=en  
         end do 
+
+        !return to the real space for plotting 
         r1_hat=exp(-k_sq*t/Re)*iuu_hat
         r2_hat=exp(-k_sq*t/Re)*ivv_hat
         r3_hat=exp(-k_sq*t/Re)*iww_hat
@@ -108,18 +121,22 @@ program main
         call ifft2(r2_hat,r2)
         call ifft2(r3_hat,r3)
         call ifft2(r4_hat,r4)
-        outputname='k_z.'//trim(arg)//'.u.dat'
+
+        ! dump the data to ascii files, replace with NETCDF
+        outputname='kz.'//trim(kzs)//'.u_'//trim(Ns)//'.dat'
         call mat_w2f_c(r1,outputname,N)
-        outputname='k_z.'//trim(arg)//'.v.dat'
+        outputname='kz.'//trim(kzs)//'.v_'//trim(Ns)//'.dat'
         call mat_w2f_c(r2,outputname,N)
-        outputname='k_z.'//trim(arg)//'.w.dat'
+        outputname='kz.'//trim(kzs)//'.w_'//trim(Ns)//'.dat'
         call mat_w2f_c(r3,outputname,N)
-        outputname='k_z.'//trim(arg)//'.rho.dat'
+        outputname='kz.'//trim(kzs)//'.rho_'//trim(Ns)//'.dat'
         call mat_w2f_c(r4,outputname,N)
-        outputname='k_z.'//trim(arg)//'.totE.dat'
-        call w2f(tote,outputname,num_steps)
-        outputname='k_z.'//trim(arg)//'.sigma.dat'
-        call w2f(growth_rate,outputname,num_steps)
+        outputname='kz.'//trim(kzs)//'.totE_'//trim(Ns)//'.dat'
+        call arr_w2f(tote,outputname,num_steps)
+        outputname='kz.'//trim(kzs)//'.sigma_'//trim(Ns)//'.dat'
+        call arr_w2f(growth_rate,outputname,num_steps)
+
+        ! deallocate everything
         call dealloc_matrices()
         call dealloc_fft()
 end program main

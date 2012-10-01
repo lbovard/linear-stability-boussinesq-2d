@@ -4,12 +4,11 @@ The idea is to take the BNS equations and derive the linear stability equations.
 
 Method:
 This code uses spectral methods w/ 2/3 de-aliasing rule to evaluate derivatives. Pressure is eliminated via projection in the fourier plane. The time stepping is done via a 2nd order Adams-Bashforth scheme. We solve for u,v,w,rho and the growth rate of the linear perturbation.  
-The equations solved are 3.3 - 3.4 of Billan and Chomaz 2000c. 
+The equations solved are 3.3 - 3.4 of Billant and Chomaz 2000c. 
 
 To do:
-make it parallel
-optimise it a bit
-document better
+add NETCDF
+maybe AB higher order??
 
 
 This code is currently run on the supercomputing cluster Sharcnet. 
@@ -17,5 +16,6 @@ This code is currently run on the supercomputing cluster Sharcnet.
 References:
 
 Billant P. & Chomaz J.-M. 2000c "Three-Dimensional stability of a vertical columnar vortex pair in a stratified fluid" J. Fluid Mech. 418, 64
+
 
 

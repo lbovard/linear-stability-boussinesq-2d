@@ -76,16 +76,32 @@ contains
                 p31=p13
         end subroutine init_projection
        
-        subroutine init_velocities()
+        subroutine init_conditions(cont,kzs)
+                integer, intent(in) :: cont
                 real(kind=8), dimension(:,:), allocatable  ::uur,vvr,wwr
-                allocate(uur(N,N),vvr(N,N),wwr(N,N))
-                call random_number(uur)
-                call random_number(vvr)
-                call random_number(wwr)
-                uu=cmplx(uur,0,8)
-                vv=cmplx(vvr,0,8)
-                ww=cmplx(wwr,0,8)
-        end subroutine init_velocities 
+                character(len=30) :: fname
+                character(len=30), intent(in) :: kzs
+                !if new run generate new initial conditions
+                if(cont==0) then
+                        allocate(uur(N,N),vvr(N,N),wwr(N,N))
+                        call random_number(uur)
+                        call random_number(vvr)
+                        call random_number(wwr)
+                        uu=cmplx(uur,0,8)
+                        vv=cmplx(vvr,0,8)
+                        ww=cmplx(wwr,0,8)
+                        rho=cmplx(0,0,8)
+                else 
+                        fname='k_z.'//trim(kzs)//'.u.dat'
+                        call mat_r2f_c(uu,fname,N)
+                        fname='k_z.'//trim(kzs)//'.v.dat'
+                        call mat_r2f_c(vv,fname,N)
+                        fname='k_z.'//trim(kzs)//'.w.dat'
+                        call mat_r2f_c(ww,fname,N)
+                        fname='k_z.'//trim(kzs)//'.rho.dat'
+                        call mat_r2f_c(rho,fname,N)
+                end if
+        end subroutine init_conditions
         
         !deallocate memory
         subroutine dealloc_matrices()

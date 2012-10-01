@@ -3,27 +3,8 @@ module display
         implicit none
         
 contains 
-        subroutine print_fft(A)
-                complex(C_DOUBLE_COMPLEX), intent(in) :: A(:,:)
-                print *, A
-        end subroutine print_fft
-        
-        subroutine print_mat(A)
-                real(kind=8), intent(in) :: A(:,:)
-                integer :: i
-                do i=1,N
-                        print '(50f8.4)', A(i,1:N) 
-                end do 
-        end subroutine print_mat
-        subroutine print_fft_matrix(A)
-                implicit none
-                complex(C_DOUBLE_COMPLEX), intent(in) :: A((N/2+1),N)
-                integer :: i
-                do i=1,Nr
-                        print '(50f8.4)', A(i,1:N) 
-                end do
-        end subroutine print_fft_matrix
 
+        !write real matrix to file
         subroutine mat_w2f(mat,fname,N)
                 integer, intent(in) :: N
                 real(kind=8), intent(in), dimension(N,N) :: mat 
@@ -38,7 +19,8 @@ contains
                 close(1)
         end subroutine mat_w2f  
 
-        subroutine w2f(mat,fname,N)
+        !write array to file
+        subroutine arr_w2f(mat,fname,N)
                 integer, intent(in) :: N
                 real(kind=8), intent(in), dimension(N) :: mat 
                 character (len=*), intent(in) :: fname
@@ -48,7 +30,9 @@ contains
                         write(1,*), mat(i)
                 end do
                 close(1)
-        end subroutine w2f  
+        end subroutine arr_w2f  
+        
+        !write complex matrix to file
         subroutine mat_w2f_c(mat,fname,N)
                 integer, intent(in) :: N
                 complex(C_DOUBLE_COMPLEX), intent(in), dimension(N,N) :: mat 
@@ -64,17 +48,38 @@ contains
                 close(1)
         end subroutine mat_w2f_c
 
-        subroutine mat_w2f_fft(mat,fname,N)
-                integer, intent(in) :: N
-                real(kind=8), intent(in), dimension(N/2+1,N) :: mat 
+        !write some data to file
+        subroutine data_w2f(mat,fname,time_step)
+                integer, intent(in) :: time_step
+                real(kind=8), intent(in) :: mat 
                 character (len=*), intent(in) :: fname
-                integer :: i,j
                 open(unit=1,file=fname)
-                do i=1,(N/2+1)
+                        write(1,*), 'Fh=', Fh
+                        write(1,*), 'N=', N
+                        write(1,*), 'Re=', Re
+                        write(1,*), 'kz=', ukz
+                        write(1,*), 'growth rate=', mat
+                        write(1,*), 'current time step=', time_step
+                        write(1,*), 'total time steps=', num_steps
+                        write(1,*), 'current time=', time_step*dt
+                close(1)
+        end subroutine data_w2f  
+
+        subroutine mat_r2f_c(mat,fname,N)
+                integer, intent(in) :: N
+                complex(C_DOUBLE_COMPLEX), intent(inout), dimension(N,N) :: mat 
+                character (len=*), intent(in) :: fname
+                real(kind=8) :: re,im
+                integer :: i,j 
+                open(unit=1,file=fname)
+                do i=1,N
                         do j=1,N
-                        write(1,*), mat(i,j)
+                                read(1,*), re
+                                read(1,*), im
+                                mat(i,j)=cmplx(re,im,8)
                         end do
                 end do
                 close(1)
-        end subroutine mat_w2f_fft
+        end subroutine mat_r2f_c 
+        
 end module display

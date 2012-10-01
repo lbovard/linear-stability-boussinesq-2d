@@ -16,23 +16,20 @@ contains
                 call ifft2(om3_hat,om3) 
         end subroutine omega
 
+        !rhs of rho equation
         subroutine rho_right()
                 r1_hat=exp(-k_sq*t/Re/Sc)*irho_hat
                 call ifft2(r1_hat,r1)
-!                call mat_w2f(r1,"rho.dat",N)
                 r2=u_0*r1
                 r3=v_0*r1
                 r4_hat=exp(-k_sq*t/Re)*iww_hat/Fh**2
                 call afft2(r2,r2_hat)
                 call afft2(r3,r3_hat)
                 rr=exp(k_sq*t/Re/Sc)*(-ii*kx*r2_hat-ii*ky*r3_hat+r4_hat)
-!                call mat_w2f_c(rr,"pp_hat.dat",N)
         end subroutine rho_right
 
+        !rhs of velocity equations
         subroutine vel_right()
-!                call mat_w2f_c(iuu_hat,"uu_hat.dat",N)
-!                call mat_w2f_c(ivv_hat,"vv_hat.dat",N)
-!                call mat_w2f_c(iww_hat,"ww_hat.dat",N)
                 r1_hat=exp(-k_sq*t/Re)*iuu_hat
                 r2_hat=exp(-k_sq*t/Re)*ivv_hat
                 r3_hat=exp(-k_sq*t/Re)*iww_hat
@@ -62,6 +59,7 @@ contains
 
         end subroutine vel_right
 
+        !comptue the energy via parseval's identity \int u ^{2} = \sum \hat{u}^{2}
         subroutine energy()
                 integer :: i,j
                 en=0.0
@@ -104,14 +102,10 @@ contains
                 do i=1,N
                         do j=1,N
                                 if(rr_sq(i,j)<1.0_8) then
-                                       !om_i(i,j)=2.0_8*BB/AA*bessel_j1(BB*rr_sq(i,j))*sin(theta(i,j))
                                         om_i(i,j)=2.0_8*BB/AA*bessel_j1(BB*rr_sq(i,j))*sin(theta(i,j))
                                 end if
                         end do
                 end do
         end subroutine init_vorticity              
-
-
-
 
 end module solver
