@@ -6,7 +6,7 @@ program main
         use solver
         integer :: i
         character(len=32) :: arg,kzs,Ns
-        character(len=20) :: outputname 
+        character(len=30) :: outputname 
         
         !get kz,Fh,Re,N from command line 
         i=command_argument_count()
