@@ -7,7 +7,7 @@ module globals
         ! N must be even
         integer :: N
         integer :: n_k, num_steps       
-        integer :: cont=1
+        integer :: cont=0
         real(kind=8) :: t_final=60.0_8
 
         real(kind=8), parameter :: pi=3.14159265358979323846264338328_8

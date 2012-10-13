@@ -4,9 +4,10 @@ program main
         use fft_routines
         use display
         use solver
-        integer :: i
-        character(len=32) :: arg,kzs,Ns
-        character(len=30) :: outputname 
+        integer :: i,fulldump, current_time
+        character(len=8) :: ct
+        character(len=32) :: kzs,Ns, res, fhs
+        character(len=60) :: outputname 
         
         !get kz,Fh,Re,N from command line 
         i=command_argument_count()
@@ -16,17 +17,18 @@ program main
         end if
         call get_command_argument(1,kzs)
         read(kzs,'(g5.2)') ukz
-        call get_command_argument(2,arg)
-        read(arg,'(g5.2)') Fh
-        call get_command_argument(3,arg)
-        read(arg,'(g7.2)') Re
+        call get_command_argument(2,fhs)
+        read(fhs,'(g5.2)') Fh
+        call get_command_argument(3,res)
+        read(res,'(g7.2)') Re
         call get_command_argument(4,Ns)
         read(Ns,'(i4)') N
 
+        !define some important information
         dx=L/real(N,8)
         dy=dx
-
         num_steps=floor(t_final/dt)
+        fulldump=floor(1.0/dt)
 
         !allocate
         call alloc_matrices()
@@ -79,11 +81,9 @@ program main
         wr_old=wr
 
         prev_en=0._8 
-        outputname='kz.'//trim(kzs)//'_data_'//trim(Ns)//'.dat'
-        num_steps=1
+        num_steps=floor(num_steps/10.0)
         do i=1,num_steps
                 t=dt*cmplx(i,0,8)
-
                 !apply Adams-Basforth 2nd order time-stepping
                 call rho_right()
                 irho_hat_new=irho_hat+1.5_8*dt*rr-0.5_8*dt*rr_old
@@ -107,9 +107,23 @@ program main
                 growth_rate(i)=(en-prev_en)/dt 
                 ! every 100 time steps dump some info 
                 if (mod(i,100)==0) then
+                        outputname='kz.'//trim(kzs)//'_data_'//trim(Ns)//'.dat'
                         call data_w2f(growth_rate(i),outputname,i)
                 end if
                 prev_en=en  
+                if (mod(i,fulldump)==0) then
+                        ! dump the data to ascii files, replace with NETCDF
+                        current_time=floor(dt*i)
+                        write(ct,'(I3.3)') current_time
+                        outputname='kz.'//trim(kzs)//'.u.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
+                        call mat_w2f_c(r1,outputname,N)
+                        outputname='kz.'//trim(kzs)//'.v.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
+                        call mat_w2f_c(r2,outputname,N)
+                        outputname='kz.'//trim(kzs)//'.w.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
+                        call mat_w2f_c(r3,outputname,N)
+                        outputname='kz.'//trim(kzs)//'.rho.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
+                        call mat_w2f_c(r4,outputname,N)
+                end if
         end do 
 
         !return to the real space for plotting 
@@ -123,17 +137,19 @@ program main
         call ifft2(r4_hat,r4)
 
         ! dump the data to ascii files, replace with NETCDF
-        outputname='kz.'//trim(kzs)//'.u_'//trim(Ns)//'.dat'
+        current_time=floor(dt*i)
+        write(ct,'(I3.3)') current_time
+        outputname='kz.'//trim(kzs)//'.u.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
         call mat_w2f_c(r1,outputname,N)
-        outputname='kz.'//trim(kzs)//'.v_'//trim(Ns)//'.dat'
+        outputname='kz.'//trim(kzs)//'.v.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
         call mat_w2f_c(r2,outputname,N)
-        outputname='kz.'//trim(kzs)//'.w_'//trim(Ns)//'.dat'
+        outputname='kz.'//trim(kzs)//'.w.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
         call mat_w2f_c(r3,outputname,N)
-        outputname='kz.'//trim(kzs)//'.rho_'//trim(Ns)//'.dat'
+        outputname='kz.'//trim(kzs)//'.rho.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
         call mat_w2f_c(r4,outputname,N)
-        outputname='kz.'//trim(kzs)//'.totE_'//trim(Ns)//'.dat'
+        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
         call arr_w2f(tote,outputname,num_steps)
-        outputname='kz.'//trim(kzs)//'.sigma_'//trim(Ns)//'.dat'
+        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
         call arr_w2f(growth_rate,outputname,num_steps)
 
         ! deallocate everything

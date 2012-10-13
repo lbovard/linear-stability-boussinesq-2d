@@ -46,8 +46,8 @@ contains
                 end if
                 n_k=(N-n_k)/2
                 cut=cmplx(1.0,0,8)
-                forall(i=1:N,j=(N/2-n_k+1):N/2) cut(i,j)=0
-                forall(i=1:N,j=N/2+2:(N/2+n_k+1)) cut(i,j)=0
+                forall(i=1:N,j=(N/2-n_k+1):(N/2+n_k+1)) cut(i,j)=0
+!                forall(i=1:N,j=N/2+2:(N/2+n_k+1)) cut(i,j)=0
                 cut=cut*transpose(cut)
         end subroutine init_wn
 
