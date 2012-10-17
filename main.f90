@@ -167,15 +167,15 @@ program main
                         print *, 'time dump' , time_dump
                         curr_dim=(/1,1,time_dump,1/)
                         count_dim=(/N,N,1,1/)
-                        call check(nf90_put_var(mdata_id,uid,real(ur),curr_dim,count_dim))
-                        call check(nf90_put_var(mdata_id,vid,real(vr),curr_dim,count_dim))
-                        call check(nf90_put_var(mdata_id,wid,real(wr),curr_dim,count_dim))
-                        call check(nf90_put_var(mdata_id,rhoid,real(rr),curr_dim,count_dim))
+                        call check(nf90_put_var(mdata_id,uid,real(r1),curr_dim,count_dim))
+                        call check(nf90_put_var(mdata_id,vid,real(r2),curr_dim,count_dim))
+                        call check(nf90_put_var(mdata_id,wid,real(r3),curr_dim,count_dim))
+                        call check(nf90_put_var(mdata_id,rhoid,real(r4),curr_dim,count_dim))
                         curr_dim=(/1,1,time_dump,2/)
-                        call check(nf90_put_var(mdata_id,uid,imag(ur),curr_dim,count_dim))
-                        call check(nf90_put_var(mdata_id,vid,imag(vr),curr_dim,count_dim))
-                        call check(nf90_put_var(mdata_id,wid,imag(wr),curr_dim,count_dim))
-                        call check(nf90_put_var(mdata_id,rhoid,imag(rr),curr_dim,count_dim))
+                        call check(nf90_put_var(mdata_id,uid,imag(r1),curr_dim,count_dim))
+                        call check(nf90_put_var(mdata_id,vid,imag(r2),curr_dim,count_dim))
+                        call check(nf90_put_var(mdata_id,wid,imag(r3),curr_dim,count_dim))
+                        call check(nf90_put_var(mdata_id,rhoid,imag(r4),curr_dim,count_dim))
                 end if
         
         end do 
@@ -192,15 +192,15 @@ program main
 !
         curr_dim=(/1,1,num_dumps+2,1/)
         count_dim=(/N,N,1,1/)
-        call check(nf90_put_var(mdata_id,uid,real(ur),curr_dim,count_dim))
-        call check(nf90_put_var(mdata_id,vid,real(vr),curr_dim,count_dim))
-        call check(nf90_put_var(mdata_id,wid,real(wr),curr_dim,count_dim))
-        call check(nf90_put_var(mdata_id,rhoid,real(rr),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,uid,real(r1),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,vid,real(r2),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,wid,real(r3),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,rhoid,real(r4),curr_dim,count_dim))
         curr_dim=(/1,1,num_dumps+2,2/)
-        call check(nf90_put_var(mdata_id,uid,imag(ur),curr_dim,count_dim))
-        call check(nf90_put_var(mdata_id,vid,imag(vr),curr_dim,count_dim))
-        call check(nf90_put_var(mdata_id,wid,imag(wr),curr_dim,count_dim))
-        call check(nf90_put_var(mdata_id,rhoid,imag(rr),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,uid,imag(r1),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,vid,imag(r2),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,wid,imag(r3),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,rhoid,imag(r4),curr_dim,count_dim))
 !        ! dump the data to ascii files, replace with NETCDF
 !        current_time=floor(dt*i)
 !        write(ct,'(I3.3)') current_time
