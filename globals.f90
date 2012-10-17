@@ -2,6 +2,7 @@
 ! Eventually make N, Fh, Re input parameters from command line
 
 module globals
+        use netcdf
         use, intrinsic :: iso_c_binding
         implicit none
         ! N must be even
