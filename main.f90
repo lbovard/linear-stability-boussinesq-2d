@@ -11,7 +11,7 @@ program main
         integer, dimension(4) :: dimids,curr_dim, count_dim
         character(len=8) :: ct
         character(len=32) :: kzs,Ns, res, fhs
-        character(len=60) :: outputname 
+        character(len=80) :: outputname 
         
         !get kz,Fh,Re,N from command line 
         i=command_argument_count()
