@@ -36,8 +36,6 @@ program main
         num_dumps=10
         !how often I dump the data, in terms of num_steps
         fulldump=floor(floor(t_final/num_dumps)/dt)
-        print *, 'full_dumps', fulldump
-        print *, 'num_dumps', num_dumps
         !allocate
         call alloc_matrices()
         call alloc_fft()
@@ -54,7 +52,8 @@ program main
         call afft2(rho,rho_hat)
        
         ! do NETCDF allocation
-        call check(nf90_create("out.nc",nf90_64bit_offset,mdata_id))
+        outputname='kz.'//trim(kzs)//'.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
+        call check(nf90_create(outputname,nf90_64bit_offset,mdata_id))
         call check(nf90_def_dim(mdata_id,"X",N,x_dimid))
         call check(nf90_def_dim(mdata_id,"Y",N,y_dimid))
         !num_dumps + 2 to include first and last
@@ -215,10 +214,12 @@ program main
 !        call mat_w2f_c(r3,outputname,N)
 !        outputname='kz.'//trim(kzs)//'.rho.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
 !        call mat_w2f_c(r4,outputname,N)
-!        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
-!        call arr_w2f(tote,outputname,num_steps)
-!        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
-!        call arr_w2f(growth_rate,outputname,num_steps)
+        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
+        call arr_w2f(tote,outputname,num_steps)
+        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
+        call arr_w2f(growth_rate,outputname,num_steps)
+
+        ! close netcdf
         call check(nf90_close(mdata_id))
         ! deallocate everything
         call dealloc_matrices()
