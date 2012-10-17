@@ -141,13 +141,13 @@ program main
                 wr_old=wr
 
                 tote(i)=en
+                prev_en=en  
                 growth_rate(i)=(en-prev_en)/dt 
                 ! every 100 time steps dump some info 
                 if (mod(i,100)==0) then
                         outputname='kz.'//trim(kzs)//'_data_'//trim(Ns)//'.dat'
                         call data_w2f(growth_rate(i),outputname,i)
                 end if
-                prev_en=en  
                ! if (mod(i,fulldump)==0) then
                !         ! dump the data to ascii files, replace with NETCDF
                !         current_time=floor(dt*i)
@@ -164,7 +164,6 @@ program main
 
                if(mod(i,fulldump)==0)  then
                         time_dump=time_dump+1
-                        print *, 'time dump' , time_dump
                         curr_dim=(/1,1,time_dump,1/)
                         count_dim=(/N,N,1,1/)
                         call check(nf90_put_var(mdata_id,uid,real(r1),curr_dim,count_dim))
@@ -176,20 +175,24 @@ program main
                         call check(nf90_put_var(mdata_id,vid,imag(r2),curr_dim,count_dim))
                         call check(nf90_put_var(mdata_id,wid,imag(r3),curr_dim,count_dim))
                         call check(nf90_put_var(mdata_id,rhoid,imag(r4),curr_dim,count_dim))
+                        current_time=floor(dt*i)
+                        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
+                        call arr_w2f(tote,outputname,num_steps)
+                        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
+                        call arr_w2f(growth_rate,outputname,num_steps)
                 end if
-        
         end do 
 
-!        !return to the real space for plotting 
-!        r1_hat=exp(-k_sq*t/Re)*iuu_hat
-!        r2_hat=exp(-k_sq*t/Re)*ivv_hat
-!        r3_hat=exp(-k_sq*t/Re)*iww_hat
-!        r4_hat=exp(-k_sq*t/Re/Sc)*irho_hat
-!        call ifft2(r1_hat,r1)
-!        call ifft2(r2_hat,r2)
-!        call ifft2(r3_hat,r3)
-!        call ifft2(r4_hat,r4)
-!
+        !return to the real space for plotting 
+        r1_hat=exp(-k_sq*t/Re)*iuu_hat
+        r2_hat=exp(-k_sq*t/Re)*ivv_hat
+        r3_hat=exp(-k_sq*t/Re)*iww_hat
+        r4_hat=exp(-k_sq*t/Re/Sc)*irho_hat
+        call ifft2(r1_hat,r1)
+        call ifft2(r2_hat,r2)
+        call ifft2(r3_hat,r3)
+        call ifft2(r4_hat,r4)
+
         curr_dim=(/1,1,num_dumps+2,1/)
         count_dim=(/N,N,1,1/)
         call check(nf90_put_var(mdata_id,uid,real(r1),curr_dim,count_dim))
