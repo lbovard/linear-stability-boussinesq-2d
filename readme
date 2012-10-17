@@ -7,12 +7,7 @@ This code uses spectral methods w/ 2/3 de-aliasing rule to evaluate derivatives.
 The equations solved are 3.3 - 3.4 of Billant and Chomaz 2000c. 
 
 To do:
-add NETCDF
 maybe AB higher order??
-fix up file handling
- -can declare some global strings
- -for NETCDF add distinguishing data labels (i.e. 1-60 vs 60-100 and so on)
-
 
 This code is currently run on the supercomputing cluster Sharcnet. 
 
