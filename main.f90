@@ -52,7 +52,7 @@ program main
         call afft2(rho,rho_hat)
        
         ! do NETCDF allocation
-        outputname='kz.'//trim(kzs)//'.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
+        outputname='kz.'//trim(kzs)//'.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.nc'
         call check(nf90_create(outputname,nf90_64bit_offset,mdata_id))
         call check(nf90_def_dim(mdata_id,"X",N,x_dimid))
         call check(nf90_def_dim(mdata_id,"Y",N,y_dimid))
@@ -140,8 +140,8 @@ program main
                 wr_old=wr
 
                 tote(i)=en
-                prev_en=en  
                 growth_rate(i)=(en-prev_en)/dt 
+                prev_en=en  
                 ! every 100 time steps dump some info 
                 if (mod(i,100)==0) then
                         outputname='kz.'//trim(kzs)//'_data_'//trim(Ns)//'.dat'
