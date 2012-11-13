@@ -4,5 +4,5 @@ module unload fftw/intel/2.1.5
 module load fftw/intel/3.3.2
 module load netcdf/intel/4.2 
 
-f90 globals.f90 display.f90 initialise.f90 fft_routines.f90 solver.f90 main.f90 $CPPFLAGS $LDFLAGS -lfftw3 -O3 -o run_simulation -diag-disable 8291 -lnetcdff -lnetcdf
+f90 globals.f90 display.f90 initialise.f90 fft_routines.f90 solver.f90 main.f90 $CPPFLAGS $LDFLAGS -lfftw3 -O3 -o run_simulation -diag-disable 8291 -lnetcdff -lnetcdf -fpp
 

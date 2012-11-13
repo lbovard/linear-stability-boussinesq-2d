@@ -1,3 +1,4 @@
+
 program main
         use globals
         use initialise
@@ -36,6 +37,7 @@ program main
         num_dumps=10
         !how often I dump the data, in terms of num_steps
         fulldump=floor(floor(t_final/num_dumps)/dt)
+
         !allocate
         call alloc_matrices()
         call alloc_fft()
@@ -46,6 +48,10 @@ program main
         call init_conditions(cont,kzs)
         call init_vorticity()
 
+        if  (hypervis == 1) then 
+                Rev=Re
+                Re=Re/(n_k**2)
+        end if
         call afft2(uu,uu_hat)
         call afft2(vv,vv_hat)
         call afft2(ww,ww_hat)

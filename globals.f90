@@ -1,5 +1,5 @@
 ! Module contains various global constants
-! Eventually make N, Fh, Re input parameters from command line
+
 
 module globals
         use netcdf
@@ -9,16 +9,19 @@ module globals
         integer :: N
         integer :: n_k, num_steps       
         integer :: cont=0
-        real(kind=8) :: t_final=100.0_8
+        integer :: hypervis = 1 ! hyperviscosity
+        real(kind=8) :: t_final=50.0_8
 
         real(kind=8), parameter :: pi=3.14159265358979323846264338328_8
 !        real(kind=8), parameter :: Fh=0.2_8, Re=10000_8, Sc=1.0_8
         real(kind=8) :: Fh, Re, Sc=1.0_8
+        real(kind=8) :: Rev !hyperviscosity variable
+    
         real(kind=8), parameter :: L=9.0_8
         real(kind=8), parameter :: tpiL=2.0_8*pi/L
 !        real(kind=8) :: dx=L/real(N,8), dy=dx
         real(kind=8) :: dx, dy
-        real(kind=8), parameter :: dt=0.00075_8/2.0_8
+        real(kind=8), parameter :: dt=0.0010_8/2.0_8
         real(kind=8) :: t=0.0_8, en, prev_en, ukz
         complex(kind=8), parameter :: ii=(0.0_8,1.0_8)
 

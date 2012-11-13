@@ -1,7 +1,7 @@
 ! Module contains routines involved in initialising, allocating, deallocating
 ! all the various matrices and arrays that are needed for simulation
 !
-
+#define HYPERVIS 1 
 module initialise       
         use globals
         use display
@@ -39,6 +39,9 @@ contains
                 ky=transpose(kx)
                 k_sq=kx*kx+ky*ky+kz*kz
                 kinv_sq=1.0_8/k_sq
+                if (hypervis==1) then
+                        k_sq=k_sq*k_sq
+                end if
                 !dealiasing information using 2/3s rule
                 n_k=ceiling(2.0/3.0*N)
                 if(mod(n_k,2)==1) then
