@@ -1,7 +1,6 @@
 ! Module contains routines involved in initialising, allocating, deallocating
 ! all the various matrices and arrays that are needed for simulation
 !
-#define HYPERVIS 1 
 module initialise       
         use globals
         use display
