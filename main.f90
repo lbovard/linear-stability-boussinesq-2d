@@ -34,9 +34,10 @@ program main
         dy=dx
         num_steps=floor(t_final/dt)
         !number of times I want to dump the data
-        num_dumps=10
+        num_dumps=100
         !how often I dump the data, in terms of num_steps
-        fulldump=floor(floor(t_final/num_dumps)/dt)
+        fulldump=floor((t_final/num_dumps)/dt)
+        print *, fulldump
 
         !allocate
         call alloc_matrices()
@@ -50,7 +51,7 @@ program main
 
         if  (hypervis == 1) then 
                 Rev=Re
-                Re=Re/(n_k**2)
+                Re=Re*(n_k**2)/2
         end if
         call afft2(uu,uu_hat)
         call afft2(vv,vv_hat)
@@ -148,24 +149,38 @@ program main
                 tote(i)=en
                 growth_rate(i)=(en-prev_en)/dt 
                 prev_en=en  
+                if (isnan(en)) then
+                        print *, "ERROR: NaNs detected at timestep"
+                        print *, i
+                        time_dump=time_dump+1
+                        curr_dim=(/1,1,time_dump,1/)
+                        count_dim=(/N,N,1,1/)
+                        call check(nf90_put_var(mdata_id,uid,real(r1),curr_dim,count_dim))
+                        call check(nf90_put_var(mdata_id,vid,real(r2),curr_dim,count_dim))
+                        call check(nf90_put_var(mdata_id,wid,real(r3),curr_dim,count_dim))
+                        call check(nf90_put_var(mdata_id,rhoid,real(r4),curr_dim,count_dim))
+                        curr_dim=(/1,1,time_dump,2/)
+                        call check(nf90_put_var(mdata_id,uid,imag(r1),curr_dim,count_dim))
+                        call check(nf90_put_var(mdata_id,vid,imag(r2),curr_dim,count_dim))
+                        call check(nf90_put_var(mdata_id,wid,imag(r3),curr_dim,count_dim))
+                        call check(nf90_put_var(mdata_id,rhoid,imag(r4),curr_dim,count_dim))
+                        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
+                        call arr_w2f(tote,outputname,num_steps)
+                        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
+                        call arr_w2f(growth_rate,outputname,num_steps)
+                        ! close netcdf
+                        call check(nf90_close(mdata_id))
+                        ! deallocate everything
+                        call dealloc_matrices()
+                        call dealloc_fft()
+                        call EXIT(0)
+                end if
+
                 ! every 100 time steps dump some info 
                 if (mod(i,100)==0) then
                         outputname='kz.'//trim(kzs)//'_data_'//trim(Ns)//'.dat'
                         call data_w2f(growth_rate(i),outputname,i)
                 end if
-               ! if (mod(i,fulldump)==0) then
-               !         ! dump the data to ascii files, replace with NETCDF
-               !         current_time=floor(dt*i)
-               !         write(ct,'(I3.3)') current_time
-               !         outputname='kz.'//trim(kzs)//'.u.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
-               !         call mat_w2f_c(r1,outputname,N)
-               !         outputname='kz.'//trim(kzs)//'.v.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
-               !         call mat_w2f_c(r2,outputname,N)
-               !         outputname='kz.'//trim(kzs)//'.w.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
-               !         call mat_w2f_c(r3,outputname,N)
-               !         outputname='kz.'//trim(kzs)//'.rho.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
-               !         call mat_w2f_c(r4,outputname,N)
-               ! end if
 
                if(mod(i,fulldump)==0)  then
                         time_dump=time_dump+1
@@ -180,10 +195,9 @@ program main
                         call check(nf90_put_var(mdata_id,vid,imag(r2),curr_dim,count_dim))
                         call check(nf90_put_var(mdata_id,wid,imag(r3),curr_dim,count_dim))
                         call check(nf90_put_var(mdata_id,rhoid,imag(r4),curr_dim,count_dim))
-                        current_time=floor(dt*i)
-                        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
+                        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
                         call arr_w2f(tote,outputname,num_steps)
-                        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
+                        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
                         call arr_w2f(growth_rate,outputname,num_steps)
                 end if
         end do 
@@ -197,7 +211,6 @@ program main
         call ifft2(r2_hat,r2)
         call ifft2(r3_hat,r3)
         call ifft2(r4_hat,r4)
-
         curr_dim=(/1,1,num_dumps+2,1/)
         count_dim=(/N,N,1,1/)
         call check(nf90_put_var(mdata_id,uid,real(r1),curr_dim,count_dim))
@@ -209,22 +222,10 @@ program main
         call check(nf90_put_var(mdata_id,vid,imag(r2),curr_dim,count_dim))
         call check(nf90_put_var(mdata_id,wid,imag(r3),curr_dim,count_dim))
         call check(nf90_put_var(mdata_id,rhoid,imag(r4),curr_dim,count_dim))
-!        ! dump the data to ascii files, replace with NETCDF
-!        current_time=floor(dt*i)
-!        write(ct,'(I3.3)') current_time
-!        outputname='kz.'//trim(kzs)//'.u.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
-!        call mat_w2f_c(r1,outputname,N)
-!        outputname='kz.'//trim(kzs)//'.v.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
-!        call mat_w2f_c(r2,outputname,N)
-!        outputname='kz.'//trim(kzs)//'.w.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
-!        call mat_w2f_c(r3,outputname,N)
-!        outputname='kz.'//trim(kzs)//'.rho.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
-!        call mat_w2f_c(r4,outputname,N)
-        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
+        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
         call arr_w2f(tote,outputname,num_steps)
-        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.'//trim(ct)//'.dat'
+        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
         call arr_w2f(growth_rate,outputname,num_steps)
-
         ! close netcdf
         call check(nf90_close(mdata_id))
         ! deallocate everything

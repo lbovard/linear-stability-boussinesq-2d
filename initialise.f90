@@ -5,7 +5,6 @@ module initialise
         use globals
         use display
         implicit none
-       ! include "fftw3.f03"
 contains
         ! allocate the memory  
         subroutine alloc_matrices()
@@ -22,7 +21,7 @@ contains
                 ! time step variables
                 allocate(iuu_hat_new(N,N),ivv_hat_new(N,N),iww_hat_new(N,N),irho_hat_new(N,N))
                 ! right side variables
-               ! allocate(rr(N,N),ur(N,N),vr(N,N),wr(N,N))
+                ! allocate(rr(N,N),ur(N,N),vr(N,N),wr(N,N))
                 allocate(rr(N,N),ur(N,N),vr(N,N),wr(N,N))
                 allocate(rr_old(N,N),ur_old(N,N),vr_old(N,N),wr_old(N,N))
                 allocate(growth_rate(num_steps))
@@ -49,7 +48,6 @@ contains
                 n_k=(N-n_k)/2
                 cut=cmplx(1.0,0,8)
                 forall(i=1:N,j=(N/2-n_k+1):(N/2+n_k+1)) cut(i,j)=0
-!                forall(i=1:N,j=N/2+2:(N/2+n_k+1)) cut(i,j)=0
                 cut=cut*transpose(cut)
         end subroutine init_wn
 
@@ -62,7 +60,6 @@ contains
                 end do
                 forall(i=1:N,j=1:N) X(i,j)=xx(j)
                 Y=transpose(X)
-
         end subroutine init_grid
 
         !initialise the projection tensor        
