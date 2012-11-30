@@ -8,6 +8,7 @@ module globals
         ! N must be even
         integer :: N
         integer :: n_k, num_steps       
+        integer :: tstep
         integer :: cont=0
         integer :: hypervis = 1 ! hyperviscosity
         real(kind=8) :: t_final=30.0_8
@@ -19,13 +20,15 @@ module globals
         real(kind=8), parameter :: L=9.0_8
         real(kind=8), parameter :: tpiL=2.0_8*pi/L
         real(kind=8) :: dx, dy
-        real(kind=8), parameter :: dt=0.0005_8/2.0_8
+        real(kind=8), parameter :: dt=0.00005_8
         real(kind=8) :: t=0.0_8, en, prev_en, ukz
         complex(kind=8), parameter :: ii=(0.0_8,1.0_8)
 
         real(kind=8), dimension(:), allocatable :: growth_rate(:),tote(:)
         real(kind=8), dimension(:,:), allocatable :: X,Y
-        complex(kind=8), dimension(:,:), allocatable :: kx,ky,kz,k_sq,kinv_sq,cut
+        complex(kind=8), dimension(:,:), allocatable :: kx,ky,kz,k_sq,kinv_sq,cut,ifactor,t_ifactor
+        complex(kind=8), dimension(:,:), allocatable :: exp_ifactor_p
+        complex(kind=8), dimension(:,:), allocatable :: exp_ifactor_n
         complex(kind=8), dimension(:,:), allocatable :: p11,p12,p13,p21,p22,p23,p31,p32,p33
         complex(kind=8), dimension(:,:), allocatable :: om_i,u_0,v_0
         complex(kind=8), dimension(:,:), allocatable :: uu_hat_temp,vv_hat_temp,ww_hat_temp

@@ -20,8 +20,9 @@ contains
                 allocate(iuu_hat(N,N),ivv_hat(N,N),iww_hat(N,N),irho_hat(N,N))
                 ! time step variables
                 allocate(iuu_hat_new(N,N),ivv_hat_new(N,N),iww_hat_new(N,N),irho_hat_new(N,N))
+                allocate(ifactor(N,N),t_ifactor(N,N),exp_ifactor_p(N,N),exp_ifactor_n(N,N))
+          
                 ! right side variables
-                ! allocate(rr(N,N),ur(N,N),vr(N,N),wr(N,N))
                 allocate(rr(N,N),ur(N,N),vr(N,N),wr(N,N))
                 allocate(rr_old(N,N),ur_old(N,N),vr_old(N,N),wr_old(N,N))
                 allocate(growth_rate(num_steps))

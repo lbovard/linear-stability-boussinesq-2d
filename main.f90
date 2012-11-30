@@ -5,10 +5,12 @@ program main
         use fft_routines
         use display
         use solver
-        integer :: i,fulldump, current_time, num_dumps, time_dump
+        integer :: i,j,fulldump, current_time, num_dumps, time_dump
+        integer :: nanspres
         !netcdf variables
         integer :: mdata_id, x_dimid,y_dimid,t_id,cmplx_id
         integer :: uid,vid,wid,rhoid
+        integer :: time_rep
         integer, dimension(4) :: dimids,curr_dim, count_dim
         character(len=8) :: ct
         character(len=32) :: kzs,Ns, res, fhs
@@ -34,10 +36,11 @@ program main
         dy=dx
         num_steps=floor(t_final/dt)
         !number of times I want to dump the data
-        num_dumps=100
+        num_dumps=50
         !how often I dump the data, in terms of num_steps
         fulldump=floor((t_final/num_dumps)/dt)
         print *, fulldump
+        print *, num_steps
 
         !allocate
         call alloc_matrices()
@@ -51,8 +54,10 @@ program main
 
         if  (hypervis == 1) then 
                 Rev=Re
-                Re=Re*(n_k**2)/2
+                Re=Re*(n_k**2)
         end if
+      
+        ifactor=k_sq/Re
         call afft2(uu,uu_hat)
         call afft2(vv,vv_hat)
         call afft2(ww,ww_hat)
@@ -124,17 +129,75 @@ program main
         call check(nf90_put_var(mdata_id,wid,imag(wr),curr_dim,count_dim))
         call check(nf90_put_var(mdata_id,rhoid,imag(rr),curr_dim,count_dim))
         time_dump=1
+        j=1
         prev_en=0._8 
         do i=1,num_steps
-                t=dt*cmplx(i,0,8)
+                tstep=i
+                
+                t=dt*cmplx(i,0,8) 
+                time_rep=dt*cmplx(j,0,8)
+                if (mod(j,1000)==0) then
+                     j=0 
+                end if
+                j=j+1
+                t_ifactor=ifactor*time_rep
+                call isnan_matrix(t_ifactor,nanspres,N) 
+                if(nanspres==1) then
+                    print *, 'problem is in t_ifactor', tstep
+                end if 
+                exp_ifactor_p=exp(ifactor)
+                call isnan_matrix(exp_ifactor_p,nanspres,N) 
+                if(nanspres==1) then
+                    print *, 'problem is in exp(t_ifactor)', tstep
+                end if 
+                exp_ifactor_n=exp(-ifactor)
+                call isnan_matrix(exp_ifactor_n,nanspres,N) 
+                if(nanspres==1) then
+                    print *, 'problem is in exp(-t_ifactor)', tstep
+                end if 
                 !apply Adams-Basforth 2nd order time-stepping
                 call rho_right()
-                irho_hat_new=irho_hat+1.5_8*dt*rr-0.5_8*dt*rr_old
                 call vel_right()
-        
+!                call isnan_matrix(rr,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in before updating rho at', tstep
+!                end if 
+!                call isnan_matrix(ur,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in before updating ur at', tstep
+!                end if 
+!                call isnan_matrix(vr,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in before updating vr at', tstep
+!                end if 
+!                call isnan_matrix(wr,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in before updating wr at', tstep
+!                end if 
+                irho_hat_new=irho_hat+1.5_8*dt*rr-0.5_8*dt*rr_old
                 iuu_hat_new=iuu_hat+1.5_8*dt*ur-0.5_8*dt*ur_old
                 ivv_hat_new=ivv_hat+1.5_8*dt*vr-0.5_8*dt*vr_old
                 iww_hat_new=iww_hat+1.5_8*dt*wr-0.5_8*dt*wr_old
+!
+!                call isnan_matrix(irho_hat_new,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in time stepping irho_hat at', tstep
+!                end if 
+!
+!                call isnan_matrix(iuu_hat_new,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in time stepping iuu_hat at', tstep
+!                end if
+!        
+!                call isnan_matrix(ivv_hat_new,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in time stepping ivv_hat at', tstep
+!                end if
+!        
+!                call isnan_matrix(iww_hat_new,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in time stepping iww_hat at', tstep
+!                end if
         
                 !update scheme
                 iuu_hat=iuu_hat_new
@@ -145,13 +208,13 @@ program main
                 ur_old=ur
                 vr_old=vr
                 wr_old=wr
-
                 tote(i)=en
                 growth_rate(i)=(en-prev_en)/dt 
                 prev_en=en  
                 if (isnan(en)) then
                         print *, "ERROR: NaNs detected at timestep"
                         print *, i
+                        print *, 'time dump', time_dump, 'at time step', i
                         time_dump=time_dump+1
                         curr_dim=(/1,1,time_dump,1/)
                         count_dim=(/N,N,1,1/)
@@ -203,10 +266,14 @@ program main
         end do 
 
         !return to the real space for plotting 
-        r1_hat=exp(-k_sq*t/Re)*iuu_hat
-        r2_hat=exp(-k_sq*t/Re)*ivv_hat
-        r3_hat=exp(-k_sq*t/Re)*iww_hat
-        r4_hat=exp(-k_sq*t/Re/Sc)*irho_hat
+!        r1_hat=exp(-k_sq*t/Re)*iuu_hat
+!        r2_hat=exp(-k_sq*t/Re)*ivv_hat
+!        r3_hat=exp(-k_sq*t/Re)*iww_hat
+!        r4_hat=exp(-k_sq*t/Re/Sc)*irho_hat
+        r1_hat=exp_i_factor_n*iuu_hat
+        r2_hat=exp_i_factor_n*ivv_hat
+        r3_hat=exp_i_factor_n*iww_hat
+        r4_hat=exp_i_factor_n*irho_hat
         call ifft2(r1_hat,r1)
         call ifft2(r2_hat,r2)
         call ifft2(r3_hat,r3)

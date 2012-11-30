@@ -18,22 +18,78 @@ contains
 
         !rhs of rho equation
         subroutine rho_right()
-                r1_hat=exp(-k_sq*t/Re/Sc)*irho_hat
+                integer :: nanspres
+                call isnan_matrix(irho_hat,nanspres,N) 
+                if(nanspres==1) then
+                    print *, 'problem in irho_hat in rho_right', tstep
+                end if
+!                r1_hat=exp(-k_sq*t/Re)*irho_hat
+!                r1_hat=exp(-t_ifactor)*irho_hat
+                r1_hat=exp_ifactor_n*irho_hat
+                call isnan_matrix(r1_hat,nanspres,N) 
+                if(nanspres==1) then
+                    print *, 'problem in r1_hat in rho_right', tstep
+                end if
                 call ifft2(r1_hat,r1)
                 r2=u_0*r1
                 r3=v_0*r1
-                r4_hat=exp(-k_sq*t/Re)*iww_hat/Fh**2
+!                r4_hat=exp(-k_sq*t/Re)*iww_hat/Fh**2
+!                r4_hat=exp(-t_ifactor)*iww_hat/Fh**2
+                r4_hat=exp_ifactor_n*iww_hat/Fh**2
+                call isnan_matrix(r4_hat,nanspres,N) 
+                if(nanspres==1) then
+                    print *, 'problem in r4_hat in rho_right', tstep
+                end if
                 call afft2(r2,r2_hat)
                 call afft2(r3,r3_hat)
-                rr=exp(k_sq*t/Re/Sc)*(-ii*kx*r2_hat-ii*ky*r3_hat+r4_hat)
+!                rr=exp(k_sq*t/Re/Sc)*(-ii*kx*r2_hat-ii*ky*r3_hat+r4_hat)
+                
+                rr=(-ii*kx*r2_hat-ii*ky*r3_hat+r4_hat)
+                call isnan_matrix(rr,nanspres,N) 
+                if(nanspres==1) then
+                    print *, 'problem in updating rr w/o ifactor in rho_right', tstep
+                end if
+                rr=exp_ifactor_p*rr
+                call isnan_matrix(rr,nanspres,N) 
+                if(nanspres==1) then
+                    print *, 'problem in updating rr times ifactor rho_right', tstep
+                end if
+                    
         end subroutine rho_right
 
         !rhs of velocity equations
         subroutine vel_right()
-                r1_hat=exp(-k_sq*t/Re)*iuu_hat
-                r2_hat=exp(-k_sq*t/Re)*ivv_hat
-                r3_hat=exp(-k_sq*t/Re)*iww_hat
-                r4_hat=exp(-k_sq*t/Re/Sc)*irho_hat
+                integer :: nanspres
+!                r1_hat=exp(-k_sq*t/Re)*iuu_hat
+!                r2_hat=exp(-k_sq*t/Re)*ivv_hat
+!                r3_hat=exp(-k_sq*t/Re)*iww_hat
+!                r4_hat=exp(-k_sq*t/Re/Sc)*irho_hat
+!                r1_hat=exp(-t_ifactor)*iuu_hat
+!                r2_hat=exp(-t_ifactor)*ivv_hat
+!                r3_hat=exp(-t_ifactor)*iww_hat
+!                r4_hat=exp(-t_ifactor)*irho_hat
+
+                r1_hat=exp_ifactor_n*iuu_hat
+                r2_hat=exp_ifactor_n*ivv_hat
+                r3_hat=exp_ifactor_n*iww_hat
+                r4_hat=exp_ifactor_n*irho_hat
+                call isnan_matrix(r1_hat,nanspres,N) 
+                if(nanspres==1) then
+                    print *, 'problem in updating r1_hat in vel_right', tstep
+                end if
+  
+                call isnan_matrix(r2_hat,nanspres,N) 
+                if(nanspres==1) then
+                    print *, 'problem in updating r2_hat in vel_right', tstep
+                end if
+                call isnan_matrix(r3_hat,nanspres,N) 
+                if(nanspres==1) then
+                    print *, 'problem in updating r3_hat in vel_right', tstep
+                end if
+                call isnan_matrix(r4_hat,nanspres,N) 
+                if(nanspres==1) then
+                    print *, 'problem in updating r4_hat in vel_right', tstep
+                end if
                 call energy()
                 call ifft2(r1_hat,r1)
                 call ifft2(r2_hat,r2)
@@ -53,10 +109,20 @@ contains
                 call afft2(C_1,C_1_hat)
                 C_1_hat=C_1_hat-r4_hat
 
-                ur=exp(k_sq*t/Re)*(p11*A_1_hat+p12*B_1_hat+p13*C_1_hat)
-                vr=exp(k_sq*t/Re)*(p21*A_1_hat+p22*B_1_hat+p23*C_1_hat)
-                wr=exp(k_sq*t/Re)*(p31*A_1_hat+p32*B_1_hat+p33*C_1_hat)
+!                ur=exp(k_sq*t/Re)*(p11*A_1_hat+p12*B_1_hat+p13*C_1_hat)
+!                vr=exp(k_sq*t/Re)*(p21*A_1_hat+p22*B_1_hat+p23*C_1_hat)
+!                wr=exp(k_sq*t/Re)*(p31*A_1_hat+p32*B_1_hat+p33*C_1_hat)
 
+!                ur=exp_ifactor_p*(p11*A_1_hat+p12*B_1_hat+p13*C_1_hat)
+!                vr=exp_ifactor_p*(p21*A_1_hat+p22*B_1_hat+p23*C_1_hat)
+!                wr=exp_ifactor_p*(p31*A_1_hat+p32*B_1_hat+p33*C_1_hat)
+                ur=p11*A_1_hat+p12*B_1_hat+p13*C_1_hat
+                vr=p21*A_1_hat+p22*B_1_hat+p23*C_1_hat
+                wr=p31*A_1_hat+p32*B_1_hat+p33*C_1_hat
+
+                ur=exp_ifactor_p*ur
+                vr=exp_ifactor_p*vr
+                wr=exp_ifactor_p*wr
         end subroutine vel_right
 
         !comptue the energy via parseval's identity \int u ^{2} = \sum \hat{u}^{2}

@@ -84,5 +84,23 @@ contains
                 end do
                 close(1)
         end subroutine mat_r2f_c 
-        
+  
+        subroutine isnan_matrix(inmat,hasnan,N)
+                integer, intent(in) :: N 
+                integer, intent(inout) :: hasnan 
+                integer :: i,j
+                complex(C_DOUBLE_COMPLEX), intent(inout), dimension(N,N) :: inmat  
+                real :: remat,immat
+                hasnan=0
+                do i=1,N
+                  do j=1,N
+                    if(isnan(real(inmat(i,j)))) then
+                        hasnan=1  
+                    end if
+                    if(isnan(imag(inmat(i,j)))) then
+                        hasnan=1  
+                    end if
+                  end do
+                end do
+        end subroutine isnan_matrix        
 end module display
