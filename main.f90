@@ -36,12 +36,11 @@ program main
         dy=dx
         num_steps=floor(t_final/dt)
         !number of times I want to dump the data
-        num_dumps=50
+        num_dumps=10
         !how often I dump the data, in terms of num_steps
         fulldump=floor((t_final/num_dumps)/dt)
         print *, fulldump
         print *, num_steps
-
         !allocate
         call alloc_matrices()
         call alloc_fft()
@@ -54,9 +53,11 @@ program main
 
         if  (hypervis == 1) then 
                 Rev=Re
-                Re=Re*(n_k**2)
-        end if
-      
+                Re=Re*(N/3.0*tpiL)**2
+                Re=Re/10
+        end if 
+        print *, 'Re = ', Re
+        print *, kzs
         ifactor=k_sq/Re
         call afft2(uu,uu_hat)
         call afft2(vv,vv_hat)
