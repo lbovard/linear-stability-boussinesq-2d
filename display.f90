@@ -60,6 +60,8 @@ contains
                         if (hypervis==1) then
                           write(1,*), 'ReV=',Rev
                         end if
+                        write(1,*), 'dt==', dt
+                        write(1,*), 'dx==', dx
                         write(1,*), 'kz=', ukz
                         write(1,*), 'growth rate=', mat
                         write(1,*), 'current time step=', time_step

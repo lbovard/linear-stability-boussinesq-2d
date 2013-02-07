@@ -53,11 +53,10 @@ program main
 
         if  (hypervis == 1) then 
                 Rev=Re
-                Re=Re*(N/3.0*tpiL)**2
-                Re=Re/10
+                Re=Re*(kmax)**2
         end if 
         print *, 'Re = ', Re
-        print *, kzs
+        print *, 'Kmax=', kmax
         ifactor=k_sq/Re
         call afft2(uu,uu_hat)
         call afft2(vv,vv_hat)
