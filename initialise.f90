@@ -32,6 +32,7 @@ contains
         ! iniitialise wavenumber matrices
         subroutine init_wn()
                 integer :: i,j 
+                !netcdf stuff
                 kz=ukz 
                 forall(i=1:N,j=1:N/2+1) kx(i,j)=cmplx(tpiL,0,8)*cmplx(j-1,0,8)
                 forall(i=1:N,j=N/2+2:N) kx(i,j)=cmplx(tpiL,0,8)*cmplx(j-N-1,0,8)
@@ -47,9 +48,9 @@ contains
                 cut=cmplx(1.0,0,8)
                 forall(i=1:N,j=(N/2-n_k+1):(N/2+n_k+1)) cut(i,j)=0
                 cut=cut*transpose(cut)
-                !not needed for hyperviscosity
                 kmax=1.0_8;
                 if (hypervis==1) then
+                        print *, 'hello'
                         k_sq=k_sq*k_sq
                         kmax=sqrt(2*(tpiL*(N/2-n_k-1))**2+kz(1,1)**2)
                 end if
