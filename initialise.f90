@@ -32,13 +32,15 @@ contains
         ! iniitialise wavenumber matrices
         subroutine init_wn()
                 integer :: i,j 
-                !netcdf stuff
                 kz=ukz 
                 forall(i=1:N,j=1:N/2+1) kx(i,j)=cmplx(tpiL,0,8)*cmplx(j-1,0,8)
                 forall(i=1:N,j=N/2+2:N) kx(i,j)=cmplx(tpiL,0,8)*cmplx(j-N-1,0,8)
                 ky=transpose(kx)
                 k_sq=kx*kx+ky*ky+kz*kz
-                kinv_sq=1.0_8/k_sq  
+                kinv_sq=1.0_8/k_sq
+                if (hypervis==1) then
+                        k_sq=k_sq*k_sq
+                end if
                 !dealiasing information using 2/3s rule
                 n_k=ceiling(2.0/3.0*N)
                 if(mod(n_k,2)==1) then
@@ -48,12 +50,6 @@ contains
                 cut=cmplx(1.0,0,8)
                 forall(i=1:N,j=(N/2-n_k+1):(N/2+n_k+1)) cut(i,j)=0
                 cut=cut*transpose(cut)
-                kmax=1.0_8;
-                if (hypervis==1) then
-                        print *, 'hello'
-                        k_sq=k_sq*k_sq
-                        kmax=sqrt(2*(tpiL*(N/2-n_k-1))**2+kz(1,1)**2)
-                end if
         end subroutine init_wn
 
         !initialise the grid 

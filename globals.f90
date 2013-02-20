@@ -10,17 +10,17 @@ module globals
         integer :: n_k, num_steps       
         integer :: tstep
         integer :: cont=0
-        integer :: hypervis = 1 ! hyperviscosity
-        real(kind=8) :: t_final=25.0
+        integer :: hypervis = 0 ! hyperviscosity
+        real(kind=8) :: t_final=25.0_8
 
         real(kind=8), parameter :: pi=3.14159265358979323846264338328_8
         real(kind=8) :: Fh, Re, Sc=1.0_8
         real(kind=8) :: Rev !hyperviscosity variable
-        real(kind=8) :: kmax    
+    
         real(kind=8), parameter :: L=9.0_8
         real(kind=8), parameter :: tpiL=2.0_8*pi/L
         real(kind=8) :: dx, dy
-        real(kind=8), parameter :: dt=0.001_8
+        real(kind=8), parameter :: dt=0.0001_8
         real(kind=8) :: t=0.0_8, en, prev_en, ukz
         complex(kind=8), parameter :: ii=(0.0_8,1.0_8)
 

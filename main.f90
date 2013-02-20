@@ -11,8 +11,6 @@ program main
         integer :: mdata_id, x_dimid,y_dimid,t_id,cmplx_id
         integer :: uid,vid,wid,rhoid
         integer :: time_rep
-        integer :: ksqmatid,xdimid,ydimid,ksqvarid
-        integer, dimension(2) :: ids, idlabel,ksqstart,ksqfinish
         integer, dimension(4) :: dimids,curr_dim, count_dim
         character(len=8) :: ct
         character(len=32) :: kzs,Ns, res, fhs
@@ -38,11 +36,12 @@ program main
         dy=dx
         num_steps=floor(t_final/dt)
         !number of times I want to dump the data
-        num_dumps=10
+        num_dumps=50
         !how often I dump the data, in terms of num_steps
         fulldump=floor((t_final/num_dumps)/dt)
         print *, fulldump
         print *, num_steps
+
         !allocate
         call alloc_matrices()
         call alloc_fft()
@@ -55,28 +54,10 @@ program main
 
         if  (hypervis == 1) then 
                 Rev=Re
-                print *, 'hello2'
-                Re=Re*(kmax)**2
-        end if 
-        print *, 'Re = ', Re
-        print *, kx(1,125:135)
-        print *, kz(1,1)
+                Re=Re*(n_k**2)
+        end if
+      
         ifactor=k_sq/Re
-        !netcdf testing for routines
-       ! call check(nf90_create("test.nc",nf90_64_bit_offset,ksqmatid) )
-       ! call check(nf90_def_dim(ksqmatid,"X",N,xdimid))
-       ! call check(nf90_def_dim(ksqmatid,"Y",N,ydimid))
-       ! ids=(/xdimid,ydimid/)
-       ! call check(nf90_def_var(ksqmatid,"term",nf90_double,ids,ksqvarid))
-       ! call check(nf90_enddef(ksqmatid))
-
-       ! ksqstart=(/1,1/)
-       ! ksqfinish=(/N,N/)
-       ! call check(nf90_put_var(ksqmatid,ksqvarid,real(v_0),ksqstart,ksqfinish))
-       ! call check(nf90_close(ksqmatid))
-       ! print *, 'wrote ksq.nc'
-        
-        !convert initial conditions to Fourier space
         call afft2(uu,uu_hat)
         call afft2(vv,vv_hat)
         call afft2(ww,ww_hat)
@@ -98,6 +79,7 @@ program main
         call check(nf90_def_var(mdata_id,"rho",nf90_double,dimids,rhoid))
 
         call check(nf90_enddef(mdata_id))
+
         uu_hat_temp=uu_hat
         vv_hat_temp=vv_hat
         ww_hat_temp=ww_hat
@@ -128,23 +110,24 @@ program main
         ivv_hat=ivv_hat_new
         iww_hat=iww_hat_new
         irho_hat=irho_hat_new
-        rr_old=rho
-        ur_old=uu
-        vr_old=vv
-        wr_old=ww
+        rr_old=rr
+        ur_old=ur
+        vr_old=vr
+        wr_old=wr
+
         !dump initial data
         curr_dim=(/1,1,1,1/)
         count_dim=(/N,N,1,1/)
-        call check(nf90_put_var(mdata_id,uid,real(uu),curr_dim,count_dim))
-        call check(nf90_put_var(mdata_id,vid,real(vv),curr_dim,count_dim))
-        call check(nf90_put_var(mdata_id,wid,real(ww),curr_dim,count_dim))
-        call check(nf90_put_var(mdata_id,rhoid,real(rho),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,uid,real(ur),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,vid,real(vr),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,wid,real(wr),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,rhoid,real(rr),curr_dim,count_dim))
 !
         curr_dim=(/1,1,1,2/)
-        call check(nf90_put_var(mdata_id,uid,imag(uu),curr_dim,count_dim))
-        call check(nf90_put_var(mdata_id,vid,imag(vv),curr_dim,count_dim))
-        call check(nf90_put_var(mdata_id,wid,imag(ww),curr_dim,count_dim))
-        call check(nf90_put_var(mdata_id,rhoid,imag(rho),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,uid,imag(ur),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,vid,imag(vr),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,wid,imag(wr),curr_dim,count_dim))
+        call check(nf90_put_var(mdata_id,rhoid,imag(rr),curr_dim,count_dim))
         time_dump=1
         j=1
         prev_en=0._8 
@@ -172,16 +155,49 @@ program main
                 if(nanspres==1) then
                     print *, 'problem is in exp(-t_ifactor)', tstep
                 end if 
-                
-                !evaluate right hand side 
+                !apply Adams-Basforth 2nd order time-stepping
                 call rho_right()
                 call vel_right()
-                 
-                !apply Adams-Basforth 2nd order time-stepping
+!                call isnan_matrix(rr,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in before updating rho at', tstep
+!                end if 
+!                call isnan_matrix(ur,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in before updating ur at', tstep
+!                end if 
+!                call isnan_matrix(vr,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in before updating vr at', tstep
+!                end if 
+!                call isnan_matrix(wr,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in before updating wr at', tstep
+!                end if 
                 irho_hat_new=irho_hat+1.5_8*dt*rr-0.5_8*dt*rr_old
                 iuu_hat_new=iuu_hat+1.5_8*dt*ur-0.5_8*dt*ur_old
                 ivv_hat_new=ivv_hat+1.5_8*dt*vr-0.5_8*dt*vr_old
                 iww_hat_new=iww_hat+1.5_8*dt*wr-0.5_8*dt*wr_old
+!
+!                call isnan_matrix(irho_hat_new,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in time stepping irho_hat at', tstep
+!                end if 
+!
+!                call isnan_matrix(iuu_hat_new,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in time stepping iuu_hat at', tstep
+!                end if
+!        
+!                call isnan_matrix(ivv_hat_new,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in time stepping ivv_hat at', tstep
+!                end if
+!        
+!                call isnan_matrix(iww_hat_new,nanspres,N) 
+!                if(nanspres==1) then
+!                    print *, 'problem in time stepping iww_hat at', tstep
+!                end if
         
                 !update scheme
                 iuu_hat=iuu_hat_new
@@ -192,7 +208,6 @@ program main
                 ur_old=ur
                 vr_old=vr
                 wr_old=wr
-
                 tote(i)=en
                 growth_rate(i)=(en-prev_en)/dt 
                 prev_en=en  
@@ -223,7 +238,6 @@ program main
                         call dealloc_fft()
                         call EXIT(0)
                 end if
-
                 ! every 100 time steps dump some info 
                 if (mod(i,100)==0) then
                         outputname='kz.'//trim(kzs)//'_data_'//trim(Ns)//'.dat'
@@ -247,7 +261,7 @@ program main
                         call arr_w2f(tote,outputname,num_steps)
                         outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
                         call arr_w2f(growth_rate,outputname,num_steps)
-                end if     
+                end if
         end do 
 
         !return to the real space for plotting 
