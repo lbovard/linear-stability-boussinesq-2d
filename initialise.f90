@@ -20,7 +20,7 @@ contains
                 allocate(iuu_hat(N,N),ivv_hat(N,N),iww_hat(N,N),irho_hat(N,N))
                 ! time step variables
                 allocate(iuu_hat_new(N,N),ivv_hat_new(N,N),iww_hat_new(N,N),irho_hat_new(N,N))
-                allocate(ifactor(N,N),t_ifactor(N,N),exp_ifactor_p(N,N),exp_ifactor_n(N,N))
+                allocate(ifactor(N,N),t_ifactor(N,N),exp_ifactor_1(N,N),exp_ifactor_2(N,N))
           
                 ! right side variables
                 allocate(rr(N,N),ur(N,N),vr(N,N),wr(N,N))
@@ -42,7 +42,8 @@ contains
                         k_sq=k_sq*k_sq
                 end if
                 !dealiasing information using 2/3s rule
-                n_k=ceiling(2.0/3.0*N)
+                print *, 'Using dealiasing rule of: ', dealias_coeff
+                n_k=ceiling(dealias_coeff*N)
                 if(mod(n_k,2)==1) then
                         n_k=n_k-1
                 end if
