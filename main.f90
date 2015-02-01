@@ -13,12 +13,12 @@ program main
         integer :: time_rep
         integer, dimension(4) :: dimids,curr_dim, count_dim
         character(len=8) :: ct
-        character(len=32) :: kzs,Ns, res, fhs
+        character(len=32) :: kzs,Ns, res, fhs, Lstr
         character(len=80) :: outputname 
         
         !get kz,Fh,Re,N from command line 
         i=command_argument_count()
-        if(i /= 4) then
+        if(i /= 5) then
                 print *, "ERROR: insufficient cl arguments"
                 call EXIT(0)
         end if
@@ -29,9 +29,12 @@ program main
         call get_command_argument(3,res)
         read(res,'(g7.2)') Re
         call get_command_argument(4,Ns)
-        read(Ns,'(i4)') N
+        read(Ns,'(i4)') N 
+        call get_command_argument(5,Lstr)
+        read(Lstr,'(g2.2)') L
 
         !define some important information
+        tpiL=2.0*pi/L 
         dx=L/real(N,8)
         dy=dx
         num_steps=floor(t_final/dt)
@@ -39,8 +42,6 @@ program main
         num_dumps=50
         !how often I dump the data, in terms of num_steps
         fulldump=floor((t_final/num_dumps)/dt)
-        print *, fulldump
-        print *, num_steps
 
         !allocate
         call alloc_matrices()
@@ -56,15 +57,19 @@ program main
                 Rev=Re
                 Re=Re*(n_k**2)
         end if
-      
-        ifactor=k_sq/Re
         call afft2(uu,uu_hat)
         call afft2(vv,vv_hat)
         call afft2(ww,ww_hat)
         call afft2(rho,rho_hat)
-       
+
+        print *,'Doing fulldump every', fulldump,' timesteps'
+        ifactor=k_sq/Re
+        t_ifactor=ifactor*dt
+        exp_ifactor_1=exp(-t_ifactor)
+        exp_ifactor_2=exp(-2*t_ifactor)
+
         ! do NETCDF allocation
-        outputname='kz.'//trim(kzs)//'.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.nc'
+        outputname='kz.'//trim(kzs)//'.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.L.'//trim(Lstr)//'.ncf'
         call check(nf90_create(outputname,nf90_64bit_offset,mdata_id))
         call check(nf90_def_dim(mdata_id,"X",N,x_dimid))
         call check(nf90_def_dim(mdata_id,"Y",N,y_dimid))
@@ -89,21 +94,21 @@ program main
         vv_hat=uu_hat_temp*p21+vv_hat_temp*p22+ww_hat_temp*p23
         ww_hat=uu_hat_temp*p31+vv_hat_temp*p32+ww_hat_temp*p33
 
+
         !convert to integrating factors
-        irho_hat=rho_hat*exp(k_sq*t/Re/Sc)
-        iuu_hat=uu_hat*exp(k_sq*t/Re)
-        ivv_hat=vv_hat*exp(k_sq*t/Re)
-        iww_hat=ww_hat*exp(k_sq*t/Re)
+        irho_hat=rho_hat
+        iuu_hat=uu_hat
+        ivv_hat=vv_hat
+        iww_hat=ww_hat
 
         !Euler method for first step        
         call rho_right() 
-        irho_hat_new=irho_hat+dt*rr
+        irho_hat_new=exp_ifactor_1*irho_hat+exp_ifactor_1*dt*rr
         call vel_right() 
         
-        iuu_hat_new=iuu_hat+dt*ur
-        ivv_hat_new=ivv_hat+dt*vr
-        iww_hat_new=iww_hat+dt*wr
-
+        iuu_hat_new=exp_ifactor_1*iuu_hat+exp_ifactor_1*dt*ur
+        ivv_hat_new=exp_ifactor_1*ivv_hat+exp_ifactor_1*dt*vr
+        iww_hat_new=exp_ifactor_1*iww_hat+exp_ifactor_1*dt*wr
 
         ! update scheme
         iuu_hat=iuu_hat_new
@@ -133,72 +138,13 @@ program main
         prev_en=0._8 
         do i=1,num_steps
                 tstep=i
-                
-                t=dt*cmplx(i,0,8) 
-                time_rep=dt*cmplx(j,0,8)
-                if (mod(j,1000)==0) then
-                     j=0 
-                end if
-                j=j+1
-                t_ifactor=ifactor*time_rep
-                call isnan_matrix(t_ifactor,nanspres,N) 
-                if(nanspres==1) then
-                    print *, 'problem is in t_ifactor', tstep
-                end if 
-                exp_ifactor_p=exp(ifactor)
-                call isnan_matrix(exp_ifactor_p,nanspres,N) 
-                if(nanspres==1) then
-                    print *, 'problem is in exp(t_ifactor)', tstep
-                end if 
-                exp_ifactor_n=exp(-ifactor)
-                call isnan_matrix(exp_ifactor_n,nanspres,N) 
-                if(nanspres==1) then
-                    print *, 'problem is in exp(-t_ifactor)', tstep
-                end if 
                 !apply Adams-Basforth 2nd order time-stepping
                 call rho_right()
                 call vel_right()
-!                call isnan_matrix(rr,nanspres,N) 
-!                if(nanspres==1) then
-!                    print *, 'problem in before updating rho at', tstep
-!                end if 
-!                call isnan_matrix(ur,nanspres,N) 
-!                if(nanspres==1) then
-!                    print *, 'problem in before updating ur at', tstep
-!                end if 
-!                call isnan_matrix(vr,nanspres,N) 
-!                if(nanspres==1) then
-!                    print *, 'problem in before updating vr at', tstep
-!                end if 
-!                call isnan_matrix(wr,nanspres,N) 
-!                if(nanspres==1) then
-!                    print *, 'problem in before updating wr at', tstep
-!                end if 
-                irho_hat_new=irho_hat+1.5_8*dt*rr-0.5_8*dt*rr_old
-                iuu_hat_new=iuu_hat+1.5_8*dt*ur-0.5_8*dt*ur_old
-                ivv_hat_new=ivv_hat+1.5_8*dt*vr-0.5_8*dt*vr_old
-                iww_hat_new=iww_hat+1.5_8*dt*wr-0.5_8*dt*wr_old
-!
-!                call isnan_matrix(irho_hat_new,nanspres,N) 
-!                if(nanspres==1) then
-!                    print *, 'problem in time stepping irho_hat at', tstep
-!                end if 
-!
-!                call isnan_matrix(iuu_hat_new,nanspres,N) 
-!                if(nanspres==1) then
-!                    print *, 'problem in time stepping iuu_hat at', tstep
-!                end if
-!        
-!                call isnan_matrix(ivv_hat_new,nanspres,N) 
-!                if(nanspres==1) then
-!                    print *, 'problem in time stepping ivv_hat at', tstep
-!                end if
-!        
-!                call isnan_matrix(iww_hat_new,nanspres,N) 
-!                if(nanspres==1) then
-!                    print *, 'problem in time stepping iww_hat at', tstep
-!                end if
-        
+                irho_hat_new=exp_ifactor_1*irho_hat+exp_ifactor_1*1.5_8*dt*rr-exp_ifactor_2*0.5_8*dt*rr_old
+                iuu_hat_new=exp_ifactor_1*iuu_hat+exp_ifactor_1*1.5_8*dt*ur-exp_ifactor_2*0.5_8*dt*ur_old
+                ivv_hat_new=exp_ifactor_1*ivv_hat+exp_ifactor_1*1.5_8*dt*vr-exp_ifactor_2*0.5_8*dt*vr_old
+                iww_hat_new=exp_ifactor_1*iww_hat+exp_ifactor_1*1.5_8*dt*wr-exp_ifactor_2*0.5_8*dt*wr_old
                 !update scheme
                 iuu_hat=iuu_hat_new
                 ivv_hat=ivv_hat_new
@@ -227,9 +173,9 @@ program main
                         call check(nf90_put_var(mdata_id,vid,imag(r2),curr_dim,count_dim))
                         call check(nf90_put_var(mdata_id,wid,imag(r3),curr_dim,count_dim))
                         call check(nf90_put_var(mdata_id,rhoid,imag(r4),curr_dim,count_dim))
-                        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
+                        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'L.'//trim(Lstr)//'.dat'
                         call arr_w2f(tote,outputname,num_steps)
-                        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
+                        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'L.'//trim(Lstr)//'.dat'
                         call arr_w2f(growth_rate,outputname,num_steps)
                         ! close netcdf
                         call check(nf90_close(mdata_id))
@@ -240,7 +186,7 @@ program main
                 end if
                 ! every 100 time steps dump some info 
                 if (mod(i,100)==0) then
-                        outputname='kz.'//trim(kzs)//'_data_'//trim(Ns)//'.dat'
+                        outputname='kz.'//trim(kzs)//'_data_'//trim(Ns)//'.L.'//trim(Lstr)//'.dat'
                         call data_w2f(growth_rate(i),outputname,i)
                 end if
 
@@ -257,22 +203,16 @@ program main
                         call check(nf90_put_var(mdata_id,vid,imag(r2),curr_dim,count_dim))
                         call check(nf90_put_var(mdata_id,wid,imag(r3),curr_dim,count_dim))
                         call check(nf90_put_var(mdata_id,rhoid,imag(r4),curr_dim,count_dim))
-                        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
+                        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'L.'//trim(Lstr)//'.dat'
                         call arr_w2f(tote,outputname,num_steps)
-                        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
+                        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'L.'//trim(Lstr)//'.dat'
                         call arr_w2f(growth_rate,outputname,num_steps)
                 end if
         end do 
-
-        !return to the real space for plotting 
-!        r1_hat=exp(-k_sq*t/Re)*iuu_hat
-!        r2_hat=exp(-k_sq*t/Re)*ivv_hat
-!        r3_hat=exp(-k_sq*t/Re)*iww_hat
-!        r4_hat=exp(-k_sq*t/Re/Sc)*irho_hat
-        r1_hat=exp_i_factor_n*iuu_hat
-        r2_hat=exp_i_factor_n*ivv_hat
-        r3_hat=exp_i_factor_n*iww_hat
-        r4_hat=exp_i_factor_n*irho_hat
+        r1_hat=iuu_hat
+        r2_hat=ivv_hat
+        r3_hat=iww_hat
+        r4_hat=irho_hat
         call ifft2(r1_hat,r1)
         call ifft2(r2_hat,r2)
         call ifft2(r3_hat,r3)
@@ -288,9 +228,9 @@ program main
         call check(nf90_put_var(mdata_id,vid,imag(r2),curr_dim,count_dim))
         call check(nf90_put_var(mdata_id,wid,imag(r3),curr_dim,count_dim))
         call check(nf90_put_var(mdata_id,rhoid,imag(r4),curr_dim,count_dim))
-        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
+        outputname='kz.'//trim(kzs)//'.totE.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'L.'//trim(Lstr)//'.dat'
         call arr_w2f(tote,outputname,num_steps)
-        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'.dat'
+        outputname='kz.'//trim(kzs)//'.sigma.'//trim(Ns)//'.re.'//trim(res)//'.fh.'//trim(fhs)//'L.'//trim(Lstr)//'.dat'
         call arr_w2f(growth_rate,outputname,num_steps)
         ! close netcdf
         call check(nf90_close(mdata_id))

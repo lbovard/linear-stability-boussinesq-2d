@@ -6,6 +6,13 @@ Method:
 This code uses spectral methods w/ 2/3 de-aliasing rule to evaluate derivatives. Pressure is eliminated via projection in the fourier plane. The time stepping is done via a 2nd order Adams-Bashforth scheme. We solve for u,v,w,rho and the growth rate of the linear perturbation.  
 The equations solved are 3.3 - 3.4 of Billant and Chomaz 2000c. 
 
+
+Note:
+If you want to use this code, go ahead but I make no guarantees that it will correctly solve your problem as this code has only been tested for 
+a very specific problem, namely find the largest growing eigenmode of the Lamb-Chaplygin dipole in a linear approximation to the Boussinesq equations
+using a spectral method. If you still want to use the code, I would greatly appreciate an e-mail.
+
+
 To do:
 maybe AB higher order??
 
