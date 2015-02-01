@@ -20,7 +20,7 @@ module globals
         real(kind=8), parameter :: L=9.0_8
         real(kind=8), parameter :: tpiL=2.0_8*pi/L
         real(kind=8) :: dx, dy
-        real(kind=8), parameter :: dt=0.0001_8
+        real(kind=8), parameter :: dt=0.0005_8
         real(kind=8) :: t=0.0_8, en, prev_en, ukz
         complex(kind=8), parameter :: ii=(0.0_8,1.0_8)
 
